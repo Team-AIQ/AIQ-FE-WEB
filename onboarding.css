@@ -1,0 +1,701 @@
+/* ========== 온보딩 페이지 ========== */
+/* 페이지 스크롤 없음, 채팅창 내부만 스크롤 */
+html,
+body.onboarding-page {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  background: var(--color-black);
+  color: var(--color-white);
+  overflow: hidden;
+}
+
+.onboarding-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--color-black);
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(2px 2px at 50px 160px, #fff, transparent),
+    radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 130px 80px, #fff, transparent);
+  background-size: 200px 200px;
+  background-position: 0 1.5rem;
+  animation: login-twinkle 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.onboarding-header {
+  position: fixed;
+  top: max(1rem, env(safe-area-inset-top));
+  left: max(1.5rem, env(safe-area-inset-left));
+  z-index: 10;
+}
+
+.onboarding-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+
+.onboarding-logo-img {
+  height: 3rem;
+  width: auto;
+  display: block;
+}
+
+.onboarding-logo.fallback .onboarding-logo-img {
+  display: none;
+}
+
+.onboarding-logo-fallback {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.onboarding-logo.fallback .onboarding-logo-fallback {
+  display: flex;
+}
+
+.onboarding-logo .logo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: var(--color-mint);
+  color: var(--color-black);
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.onboarding-layout {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100%;
+  padding: max(4rem, env(safe-area-inset-top)) 0 max(2rem, env(safe-area-inset-bottom)) 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+/* 왼쪽: 캐릭터 + 타자기 + 건너뛰기 (5:5 중 왼쪽 50%) */
+.onboarding-left {
+  flex: 0 0 50%;
+  width: 50%;
+  max-width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2rem;
+  padding-left: max(2rem, env(safe-area-inset-left));
+  padding-right: 1rem;
+}
+
+.onboarding-character-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 1.5rem;
+}
+
+.onboarding-character {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-character img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+}
+
+.onboarding-intro {
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-white);
+  text-align: center;
+  margin: 0 0 2rem;
+  min-height: 3.4em;
+}
+
+.onboarding-intro .typewriter-cursor {
+  color: var(--color-mint);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.onboarding-skip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  font-family: "Galmuri9", sans-serif;
+  font-size: 0.9rem;
+  color: var(--color-white);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.onboarding-skip-btn:hover {
+  opacity: 0.8;
+}
+
+.onboarding-skip-icon-img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.onboarding-skip-text {
+  white-space: nowrap;
+  color: var(--color-white);
+}
+
+.onboarding-skip-arrow {
+  color: var(--color-white);
+  font-size: 1rem;
+}
+
+/* 오른쪽: 유저명 칸 + 채팅 (5:5 중 오른쪽 50%만 사용) */
+.onboarding-right {
+  flex: 0 0 50%;
+  width: 50%;
+  max-width: 50%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  padding: 1.25rem max(2rem, env(safe-area-inset-right)) 1.25rem 1.5rem;
+  overflow: visible;
+}
+
+.onboarding-right-top {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  /* 채팅창 시작 위치 고정(게이지 올려도 채팅 크기 유지) */
+  min-height: 10rem;
+  /* 왼쪽 로고(top: 1rem)와 같은 높이로 맞추기 */
+  margin-top: -4.25rem;
+}
+
+/* 2번 이미지: 검정 캡슐 + 민트 글로우 테두리 + 흰 아이콘·닉네임 */
+.onboarding-user-box {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem 0.5rem 0.75rem;
+  background: #000000;
+  border: 1px solid rgba(63, 221, 144, 0.6);
+  border-radius: 999px;
+  align-self: flex-end;
+  box-shadow:
+    0 0 8px rgba(63, 221, 144, 0.4),
+    0 0 20px rgba(63, 221, 144, 0.25);
+}
+
+.onboarding-user-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  object-fit: contain;
+  mix-blend-mode: lighten;
+}
+
+.onboarding-user-name {
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.75rem;
+  color: var(--color-white);
+}
+
+/* 게이지 이미지: 원본 사이즈 그대로 채팅 위에 배치 */
+/* 게이지: 이미지와 동일한 스타일 - 검정 배경 + 민트 테두리 + 채움 + 퍼센트 텍스트 */
+/* 게이지 이미지: 절대 위치로 흐름과 분리, 채팅창 크기 유지하면서 이미지만 조정 */
+/* 0% 진입 화면 이미지 기준(326×56) - 0/25/50/75/100% 동일 크기·위치 */
+.onboarding-gauge-wrap {
+  position: absolute;
+  top: 5.5rem;
+  left: 0;
+  margin-left: -0.85rem;
+  margin-top: 0;
+  margin-bottom: 0;
+  width: 326px;
+  height: 56px;
+  z-index: 2;
+}
+
+/* 모든 게이지 동일 박스(326×56)에 맞춤 - 비율 다른 이미지도 같은 크기로 표시 */
+.onboarding-gauge-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+
+/* 채팅창: 높이 제한으로 내부만 스크롤(페이지 스크롤 아님) */
+.onboarding-chat-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid rgba(63, 221, 144, 0.65);
+  border-radius: 0;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 12px rgba(63, 221, 144, 0.2);
+}
+
+.onboarding-chat-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url("/image/chat-bg-matrix.png") center 0 repeat-y;
+  background-size: 100% auto;
+  animation: onboarding-chat-bg-scroll 20s linear infinite;
+}
+
+.onboarding-chat-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.5) 0%,
+    transparent 25%,
+    transparent 75%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+  pointer-events: none;
+}
+
+@keyframes onboarding-chat-bg-scroll {
+  0% { background-position: center 0; }
+  100% { background-position: center 100%; }
+}
+
+/* 채팅 내부 스크롤 영역: 위쪽 내용이 위로 올라가며 새 메시지는 아래에 쌓임 */
+.onboarding-chat {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 2.75rem 1.25rem 1.25rem 1.25rem;
+}
+
+.onboarding-msg {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  animation: onboarding-msg-appear 0.4s ease-out;
+}
+
+.onboarding-msg:last-child {
+  margin-bottom: 0;
+}
+
+.onboarding-msg--user {
+  flex-direction: row-reverse;
+}
+
+/* 첫 AI 메시지: 아바타 절대 위치로 행 높이 = 말풍선 높이만, 간격 동일하게 */
+.onboarding-msg--ai:not(.onboarding-msg--ai-continuation) {
+  position: relative;
+  padding-left: calc(44px + 0.75rem);
+}
+
+.onboarding-msg--ai:not(.onboarding-msg--ai-continuation) .onboarding-msg-avatar {
+  position: absolute;
+  left: 0;
+  top: -8px;
+}
+
+/* 연속 AI 메시지: 프로필 없이 말풍선만, 첫 줄과 정렬 유지 */
+.onboarding-msg--ai-continuation {
+  padding-left: calc(44px + 0.75rem);
+}
+
+@keyframes onboarding-msg-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Step 3 전환 시 이전 채팅이 위로 올라가며 사라지는 애니메이션 */
+.onboarding-msg--slide-up {
+  animation: onboarding-msg-slide-up 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes onboarding-msg-slide-up {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
+.onboarding-msg-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(63, 221, 144, 0.2);
+}
+
+.onboarding-msg-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 1번 이미지: AIQ(AI) 말풍선 – 검정 채움 + 민트 실선 테두리(밝기 낮춤) + 글로우, 크기 축소 */
+.onboarding-msg-bubble {
+  display: inline-block;
+  width: fit-content;
+  max-width: 85%;
+  padding: 0.45rem 0.75rem;
+  font-family: "Galmuri9", sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--color-white);
+  text-align: center;
+  background-color: #000000;
+  border: 1px solid rgba(63, 221, 144, 0.7);
+  border-radius: 0 14px 14px 14px;
+  box-shadow:
+    0 0 4px rgba(63, 221, 144, 0.35),
+    0 0 10px rgba(63, 221, 144, 0.2),
+    0 0 20px rgba(63, 221, 144, 0.15),
+    0 0 32px rgba(63, 221, 144, 0.1);
+  align-self: flex-start;
+}
+
+/* 사용자 말풍선 – 민트 채움 + 초록 그림자 퍼짐 */
+.onboarding-msg-bubble--user {
+  display: inline-block;
+  width: fit-content;
+  max-width: 85%;
+  padding: 0.45rem 0.75rem;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--color-black);
+  font-weight: bold;
+  background: #45D38E;
+  border: none;
+  border-radius: 22.4px 0 22.4px 22.4px;
+  box-shadow:
+    0 0 12px rgba(63, 221, 144, 0.45),
+    0 0 28px rgba(63, 221, 144, 0.35),
+    0 0 44px rgba(63, 221, 144, 0.25),
+    0 0 60px rgba(63, 221, 144, 0.15);
+  align-self: flex-start;
+}
+
+.onboarding-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.onboarding-choice-btn--long {
+  flex: 1 1 100%;
+  min-width: 100%;
+}
+
+/* 1번 이미지: 하단 버튼 기본(클릭 전) – 밝은 민트 채움 + 더 진한 민트 테두리 */
+/* 기본: 왼쪽처럼 빛나는 초록색 배경 + 검정 글씨 + 강한 초록 글로우 */
+.onboarding-choice-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 0.75rem 1.25rem;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.88rem;
+  color: var(--color-black);
+  background: rgba(63, 221, 144, 0.7);
+  border: 1px solid rgba(63, 221, 144, 0.8);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 
+    0 0 12px rgba(63, 221, 144, 0.7),
+    0 0 24px rgba(63, 221, 144, 0.5),
+    0 0 40px rgba(63, 221, 144, 0.35);
+}
+
+/* 마우스 오버 시: 흰색 배경 + 검정 텍스트 */
+.onboarding-choice-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 1);
+  color: var(--color-black);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 0 12px rgba(63, 221, 144, 0.4),
+    0 0 24px rgba(63, 221, 144, 0.3);
+}
+
+/* 클릭 후: 흰색 배경 + 검정 글씨 + 초록 그림자 */
+.onboarding-choice-btn--clicked,
+.onboarding-choice-btn:disabled {
+  background: rgba(255, 255, 255, 1);
+  color: var(--color-black);
+  box-shadow: 0 0 12px rgba(63, 221, 144, 0.25), 0 0 24px rgba(63, 221, 144, 0.15);
+  cursor: default;
+}
+
+/* 채팅 4개 다 나오기 전: 비활성(흐리게) + 클릭 불가 */
+.onboarding-choice-btn--waiting:disabled {
+  background: rgba(63, 221, 144, 0.35);
+  color: var(--color-black);
+  border-color: rgba(63, 221, 144, 0.5);
+  box-shadow: 0 0 8px rgba(63, 221, 144, 0.25);
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+@media (max-width: 900px) {
+  .onboarding-layout {
+    flex-direction: column;
+    align-items: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .onboarding-left {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .onboarding-character-wrap {
+    max-width: 200px;
+  }
+
+  .onboarding-right {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* 랜딩 효과: 우주선 + 견인 광선 */
+.onboarding-landing-effect {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  overflow: hidden;
+  background: #000000;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(2px 2px at 50px 160px, #fff, transparent),
+    radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 130px 80px, #fff, transparent);
+  background-size: 200px 200px;
+  animation: login-twinkle 8s ease-in-out infinite;
+}
+
+/* 우주선: 왼쪽에서 오른쪽으로 날아오기 - 더 우주선처럼 */
+.onboarding-spaceship {
+  position: absolute;
+  top: 20%;
+  left: -200px;
+  width: 140px;
+  height: 100px;
+  background: linear-gradient(135deg, #3FDD90 0%, #29C99A 50%, #1FB88A 100%);
+  clip-path: polygon(
+    10% 20%, 25% 5%, 40% 0%, 60% 0%, 75% 5%, 90% 20%,
+    95% 40%, 90% 60%, 75% 75%, 60% 80%, 40% 80%, 25% 75%, 10% 60%, 5% 40%
+  );
+  box-shadow:
+    0 0 40px rgba(63, 221, 144, 1),
+    0 0 80px rgba(63, 221, 144, 0.7),
+    0 0 120px rgba(63, 221, 144, 0.4),
+    inset 0 0 30px rgba(255, 255, 255, 0.4),
+    inset -20px 0 20px rgba(0, 0, 0, 0.3);
+  animation: spaceship-fly 2s ease-out forwards;
+}
+
+.onboarding-spaceship::before {
+  content: "";
+  position: absolute;
+  top: 20%;
+  left: 15%;
+  width: 30%;
+  height: 60%;
+  background: rgba(255, 255, 255, 0.6);
+  clip-path: polygon(0% 0%, 100% 20%, 100% 80%, 0% 100%);
+  border-radius: 2px;
+}
+
+.onboarding-spaceship::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 20px;
+  background: linear-gradient(to bottom, rgba(63, 221, 144, 0.8), transparent);
+  clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+}
+
+@keyframes spaceship-fly {
+  0% {
+    left: -200px;
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    left: 50%;
+    transform: translateX(-50%) translateY(0) rotate(-3deg);
+  }
+  100% {
+    left: 50%;
+    transform: translateX(-50%) translateY(0) rotate(0deg);
+  }
+}
+
+/* 견인 광선: 우주선 아래에서 내려오기 - 화면을 가르는 효과 */
+.onboarding-tractor-beam {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(63, 221, 144, 1) 0%,
+    rgba(63, 221, 144, 0.9) 10%,
+    rgba(63, 221, 144, 0.7) 30%,
+    rgba(63, 221, 144, 0.5) 50%,
+    rgba(63, 221, 144, 0.3) 70%,
+    rgba(63, 221, 144, 0.1) 90%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 30px rgba(63, 221, 144, 1),
+    0 0 60px rgba(63, 221, 144, 0.8),
+    0 0 100px rgba(63, 221, 144, 0.6),
+    0 0 150px rgba(63, 221, 144, 0.4);
+  animation: tractor-beam-descend 1.5s ease-out 1.5s forwards;
+  border-radius: 6px;
+}
+
+/* 견인 광선이 화면을 가르는 효과 */
+.onboarding-tractor-beam::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(63, 221, 144, 0.15) 20%,
+    rgba(63, 221, 144, 0.3) 50%,
+    rgba(63, 221, 144, 0.15) 80%,
+    transparent 100%
+  );
+  filter: blur(40px);
+  animation: tractor-beam-descend 1.5s ease-out 1.5s forwards;
+}
+
+@keyframes tractor-beam-descend {
+  0% {
+    height: 0;
+    top: 20%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    height: 100vh;
+    top: 20%;
+    opacity: 0.9;
+  }
+}
+
+/* 랜딩 효과 중 뒷 화면 숨기기 */
+.onboarding-landing-effect ~ * {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 견인 광선에 따라 화면이 갈라지면서 채팅 화면 나타나기 */
+.onboarding-landing-effect {
+  animation: screen-split 0.8s ease-out 2.8s forwards;
+}
+
+@keyframes screen-split {
+  0% {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+  50% {
+    clip-path: inset(0 20% 0 20%);
+    opacity: 0.7;
+  }
+  100% {
+    clip-path: inset(0 50% 0 50%);
+    opacity: 0;
+  }
+}

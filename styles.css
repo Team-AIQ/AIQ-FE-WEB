@@ -1,0 +1,1437 @@
+/* ========== AIQ Design Tokens ========== */
+:root {
+  --color-black: #0a0a0a;
+  --color-mint: #3FDD90;
+  --color-mint-dark: #45D38E;
+  --color-teal: #41C99A;
+  --color-white: #ffffff;
+  --color-gray: rgba(255, 255, 255, 0.7);
+  --color-gray-dim: rgba(255, 255, 255, 0.5);
+  --font-display: 'Audiowide', sans-serif;
+  --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  --glow-mint: 0 0 20px rgba(63, 221, 144, 0.4);
+  --glow-mint-strong: 0 0 30px rgba(63, 221, 144, 0.6);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-width: 100vw;
+  height: auto;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--color-black);
+  color: var(--color-white);
+  line-height: 1.6;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-width: 100vw;
+  height: auto;
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ========== Shared: Stars background ========== */
+.stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(2px 2px at 50px 160px, #fff, transparent),
+    radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 130px 80px, #fff, transparent);
+  background-size: 200px 200px;
+  animation: twinkle 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ========== 1단: 진입 화면 (Hero) - 한 페이지(100vh) 고정 ========== */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem 2.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 배경은 1단 영역(100vh) 안에만 표시 */
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  z-index: 0;
+}
+
+/* 배경 이미지(투명 버전): 별(.stars) 위에 겹침 → 별 있는 모습 유지 */
+.hero-bg-image {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: url("/image/hero-bg.png");
+  background-size: cover;
+  background-position: center 75%;
+  pointer-events: none;
+}
+
+/* 배경 행성 - 100vh 기준 하단만 차지, 화면 밖으로 나가지 않음 */
+.hero-bg .planet-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180%;
+  max-width: 1200px;
+  height: 32vh;
+  background: radial-gradient(ellipse at center, #1a2332 0%, #0d1520 40%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* 오른쪽 상단 해 이미지 */
+/* 해 - 오른쪽 끝선에 맞춤, 크기 축소 */
+.hero-bg .sun-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30%;
+  max-width: 300px;
+  height: 30vh;
+  background-image: url("/image/hero-sun.png");
+  background-size: contain;
+  background-position: 100% 0;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 스크롤해도 상단에 고정 */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  padding-top: max(1.5rem, env(safe-area-inset-top));
+  padding-left: max(1.5rem, env(safe-area-inset-left));
+  padding-right: max(1.5rem, env(safe-area-inset-right));
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+}
+
+.logo-img {
+  height: 3.5rem;
+  width: auto;
+  display: block;
+}
+
+.logo-fallback {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 로고 이미지가 정상 로드된 경우에만 텍스트 폴백 숨김 */
+.logo:has(.logo-img:not([style*="display: none"])) .logo-fallback {
+  display: none;
+}
+
+.logo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background: var(--color-mint);
+  color: var(--color-black);
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1.5rem;
+  box-shadow: var(--glow-mint);
+}
+
+.btn-login {
+  display: inline-block;
+  padding: 0.8rem 1.4rem 0.4rem;
+  min-height: 44px;
+  line-height: 1;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: transparent;
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.25);
+  transition: background 0.2s, box-shadow 0.2s;
+  margin-right: -0.5rem;
+  margin-bottom: 0;
+  vertical-align: middle;
+}
+
+.btn-login:hover {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.35);
+}
+
+/* 텍스트 + 캐릭터 + 버튼들 세로 중앙 정렬 - 100vh 안에 수납 */
+.hero-main {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow: visible;
+  flex-shrink: 0;
+  margin-top: 4rem;
+}
+
+.hero-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 2.5rem;
+}
+
+/* 2문장 공간 고정 → 타자 효과 중 캐릭터·버튼 위치 안 움직임 */
+.hero-greeting {
+  font-family: "Galmuri9", var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--color-gray);
+  margin: 0 0 1.25rem;
+  min-height: 3.6rem;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  color: var(--color-mint);
+  animation: blink 0.8s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* 시작하기 + AIQ 자세히 보기 */
+.hero-cta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin-top: -2rem;
+}
+
+.hero-mascot {
+  position: relative;
+  margin: 0 auto 1.25rem;
+  width: 380px;
+  height: 380px;
+}
+
+.mascot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: mascot-float 3s ease-in-out 0s infinite;
+}
+.hero.hero-play .mascot-img {
+  animation: mascot-grow 0.7s ease-out forwards, mascot-float 3s ease-in-out 0.7s infinite;
+}
+
+/* 거의 안 보일 정도로 작았다가 슈웅 커지는 모션 */
+@keyframes mascot-grow {
+  0% { transform: scale(0.06) translateY(0); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+/* 그 다음 둥둥 떠있는 모션 */
+@keyframes mascot-float {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1) translateY(-12px); }
+}
+
+.btn-start {
+  position: relative;
+  display: inline-block;
+  min-width: 240px;
+  min-height: 48px;
+  padding: 0.85rem 2.8rem;
+  border: 2px solid var(--color-mint);
+  border-radius: 999px;
+  background: rgba(63, 221, 144, 0.08);
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 0;
+  text-align: center;
+  box-shadow: var(--glow-mint);
+  transition: background 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.btn-start-text {
+  display: inline-block;
+}
+
+.btn-start-arrow {
+  position: absolute;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.btn-start:hover {
+  background: rgba(63, 221, 144, 0.2);
+  box-shadow: var(--glow-mint-strong);
+}
+
+/* AIQ 자세히 보기 - 시작하기 버튼 아래, 100vh 안에 보이도록 */
+.hero .link-learn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 7.5rem;
+  color: var(--color-gray-dim);
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.hero .link-learn:hover {
+  color: var(--color-mint);
+}
+
+.chevron-down {
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid currentColor;
+}
+
+.chevron-up {
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 8px solid currentColor;
+}
+
+/* ========== 2단: About AIQ ========== */
+.about {
+  position: relative;
+  padding: 2.5rem 1.5rem 2.5rem;
+  min-height: 100vh;
+}
+
+.about-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.about-bg-image {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-image: url("/image/about-bg.png");
+  background-size: cover;
+  background-position: center 20%;
+  pointer-events: none;
+}
+
+.about-bg .planet-top {
+  position: absolute;
+  top: -15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  max-width: 900px;
+  height: 40vh;
+  background: radial-gradient(ellipse at center, #1a2332 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.about-label {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-family: "Galmuri9", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-gray);
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.1em;
+}
+
+.about-title {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-family: "Galmuri9", sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  color: var(--color-mint);
+  margin: 0 0 0.5rem;
+  text-shadow: var(--glow-mint);
+}
+
+.about-tagline {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: #45D38E;
+  margin: 0 0 1.5rem;
+}
+
+.steps {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 4rem auto 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+.step-card {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  border: 2px solid var(--color-mint);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: var(--glow-mint);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  overflow: visible;
+  min-width: 0;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  transform-origin: center;
+}
+
+/* 2단 진입 시 1→2→3→4 순서대로 빠르게 등장 (애니메이션으로만, 호버는 지연 없음) */
+@keyframes step-card-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.about.in-view .step-card:nth-child(1) {
+  animation: step-card-in 0.32s ease-out forwards;
+  animation-delay: 0s;
+}
+.about.in-view .step-card:nth-child(2) {
+  animation: step-card-in 0.32s ease-out forwards;
+  animation-delay: 0.1s;
+}
+.about.in-view .step-card:nth-child(3) {
+  animation: step-card-in 0.32s ease-out forwards;
+  animation-delay: 0.2s;
+}
+.about.in-view .step-card:nth-child(4) {
+  animation: step-card-in 0.32s ease-out forwards;
+  animation-delay: 0.3s;
+}
+
+/* 카드 자체는 호버 시 변화 없음, 내부 캐릭터 이미지만 확대 */
+.step-card:hover .step-illust img {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 16px rgba(63, 221, 144, 0.4)) drop-shadow(0 0 24px rgba(255, 255, 255, 0.15));
+}
+
+.step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--color-mint);
+  color: var(--color-black);
+  font-family: var(--font-body);
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: -1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--glow-mint);
+}
+
+.step-title {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-mint);
+  margin: 0 0 0.75rem;
+  line-height: 1.3;
+}
+
+.step-desc {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--color-gray);
+  margin: 0 0 1rem;
+  flex-grow: 1;
+}
+
+.step-illust {
+  width: 100%;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-illust img {
+  max-width: 100%;
+  max-height: 320px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.25s ease, filter 0.25s ease;
+  transform-origin: center center;
+}
+
+.step-illust.step-2 img,
+.step-illust.step-4 img {
+  max-height: 320px;
+}
+
+.step-illust.placeholder {
+  background: rgba(63, 221, 144, 0.1);
+  border-radius: 8px;
+  border: 1px dashed var(--color-mint);
+}
+
+.link-app-down {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-gray-dim);
+  font-size: 0.9rem;
+  text-decoration: none;
+  margin: 2rem auto 0;
+  width: fit-content;
+  transition: color 0.2s;
+}
+
+.link-app-down:hover {
+  color: var(--color-mint);
+}
+
+/* ========== 3단: 앱 소개 + 다운로드 ========== */
+.app-section {
+  position: relative;
+  padding: 2rem 1.5rem 0;
+  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: padding 0.35s ease, min-height 0.35s ease, height 0.35s ease;
+}
+
+.app-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.app-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  align-items: flex-end;
+  width: 100%;
+  padding-bottom: 0;
+  transition: gap 0.35s ease, grid-template-columns 0.35s ease;
+}
+
+/* 웹앱(반응형) 3단: 휴대폰 → 문구·버튼 → 캐릭터, 아래 공간까지 골고루 활용 */
+@media (max-width: 900px) {
+  .app-section {
+    min-height: 100vh;
+    height: 100vh;
+    padding: 0.75rem 1rem 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: padding 0.35s ease;
+  }
+  .app-section .app-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 1rem;
+    padding-top: 12vh;
+    padding-bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  /* ① 휴대폰: 크기 더 키움, 텍스트와 거리 유지 (gap 1rem) */
+  .app-section .app-inner .app-left {
+    order: 1;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-self: center;
+    margin: 0;
+    padding: 0;
+    margin-left: 0;
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+  .app-section .app-inner .app-left .app-left-img {
+    max-height: 360px;
+    width: auto;
+    max-width: min(400px, 92vw);
+    object-fit: contain;
+    margin: 0 auto;
+    display: block;
+  }
+  /* ② 문구·버튼 (휴대폰 바로 아래) */
+  .app-section .app-inner .app-copy {
+    order: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-bottom: 0;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+  }
+  .app-section .app-copy .app-star--top { display: none; }
+  .app-section .app-copy .app-headline { text-align: center; font-size: 1.05rem; margin: 0 0 0.2rem; line-height: 1.35; }
+  .app-section .app-copy .app-headline.app-headline-accent { text-align: center; font-size: 1.05rem; }
+  .app-section .app-copy .app-slogan { text-align: center; font-size: 0.8rem; margin: 0 0 0.1rem; }
+  .app-section .app-copy .app-desc { text-align: center; font-size: 0.75rem; margin: 0 0 0.4rem; }
+  .app-section .app-copy .app-buttons { justify-content: center; margin: 0; gap: 0.5rem; }
+  .app-section .app-copy .app-buttons .app-store-link img,
+  .app-section .app-copy .app-buttons .google-play-link img { height: 42px; width: auto; object-fit: contain; }
+  .app-section .app-copy .app-star--mascot { margin: 0 auto; height: 20px; }
+  /* ③ 캐릭터: 3단 바닥에 붙이기 + 진입 시 아래에서 위로 올라오는 애니 (웹앱) */
+  .app-section .app-copy .app-mascot {
+    position: static;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: transform 0.9s ease-out, opacity 0.7s ease-out;
+    justify-content: center;
+    align-items: flex-end;
+    margin: 0 auto;
+    margin-top: auto;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    flex-shrink: 0;
+  }
+  .app-section .app-copy .app-mascot img {
+    max-width: 220px;
+    width: auto;
+    max-height: 50vh;
+    height: auto;
+    object-fit: contain;
+    object-position: bottom;
+    display: block;
+    vertical-align: bottom;
+  }
+  .app-section.in-view .app-copy .app-mascot {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 좌측: 로고·아이콘·폰 통합 이미지 (align-self로 위에 붙임, 왼쪽 이미지만 위·왼쪽으로 이동) */
+.app-left {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0;
+  overflow: visible;
+  align-self: flex-start;
+  margin-left: -6rem;
+  margin-top: -3rem;
+  transition: margin 0.35s ease, justify-content 0.35s ease, align-self 0.35s ease;
+}
+
+.app-left.placeholder {
+  min-height: 320px;
+  border: 2px dashed var(--color-mint);
+  border-radius: 16px;
+  background: rgba(63, 221, 144, 0.05);
+}
+
+.app-left-img {
+  max-width: 100%;
+  max-height: 580px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
+}
+
+.app-headline {
+  font-family: "Galmuri9", sans-serif;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--color-white);
+  margin: 0 0 0.5rem;
+  line-height: 1.3;
+  position: relative;
+  z-index: 1;
+}
+
+/* 3단 진입 시 헤드라인: 깜빡 깜빡 → 보임 */
+.app-section .app-copy .app-headline {
+  opacity: 0;
+}
+.app-section.in-view .app-copy .app-headline {
+  animation: headline-blink-twice 1.2s ease-out forwards;
+}
+
+@keyframes headline-blink-twice {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  40% { opacity: 0; }
+  60% { opacity: 1; }
+  80% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.app-headline-accent {
+  color: #41C99A;
+  white-space: nowrap;
+}
+
+.app-slogan {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-gray);
+  margin: 0 0 0.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+.app-desc {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-gray);
+  margin: 0 0 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.app-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 1;
+}
+
+.app-store-link,
+.google-play-link {
+  display: inline-block;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.app-store-link:hover,
+.google-play-link:hover {
+  opacity: 0.9;
+}
+
+.app-store-link img,
+.google-play-link img {
+  display: block;
+  height: 72px;
+  width: auto;
+  object-fit: contain;
+}
+
+.app-copy {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-bottom: 320px;
+  text-align: right;
+  align-items: flex-end;
+}
+
+/* 3단 장식 별 (같은 이미지 app-star.png, 방향만 조정) */
+.app-star {
+  position: absolute;
+  width: auto;
+  height: 48px;
+  max-height: 6vw;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.app-star--top {
+  top: -4.5rem;
+  right: 0;
+  transform: scale(1);
+}
+
+.app-star--mascot {
+  bottom: 120px;
+  left: 3rem;
+  transform: scaleX(-1);
+}
+
+.app-mascot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 0;
+  width: auto;
+  max-width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 0;
+  line-height: 0;
+  pointer-events: none;
+  z-index: 1;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: transform 0.9s ease-out, opacity 0.7s ease-out;
+}
+
+.app-section.in-view .app-mascot {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.app-mascot img {
+  max-width: 360px;
+  width: auto;
+  height: auto;
+  max-height: 55vh;
+  object-fit: contain;
+  object-position: bottom;
+  vertical-align: bottom;
+  display: block;
+  margin-bottom: 0;
+}
+
+/* 3단 하단: 푸터로 내리는 버튼 (단순 회색 세모) */
+.btn-to-footer {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.btn-to-footer:hover {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.btn-to-footer:focus {
+  outline: none;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.btn-to-footer .chevron-down {
+  color: currentColor;
+}
+
+/* ========== 4단: 푸터 ========== */
+.footer {
+  background: var(--color-black);
+  padding: 3rem 2rem 2rem;
+  border-top: 1px solid rgba(63, 221, 144, 0.2);
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3rem;
+}
+
+@media (max-width: 700px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .footer-nav {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* 웹앱: 4단 푸터 — 네비(서비스·정책) 가로 배치 + 상단에 배치 */
+@media (max-width: 900px) {
+  .footer-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    text-align: center;
+  }
+  .footer-left {
+    order: -1;
+  }
+  .footer .copyright {
+    margin-top: 3rem;
+    margin-bottom: 0;
+  }
+  .footer-nav {
+    order: 1;
+    margin-top: 2.5rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2rem 3rem;
+  }
+  .footer .nav-col {
+    text-align: center;
+  }
+  .footer .nav-col h4 {
+    margin-bottom: 0.5rem;
+  }
+  .footer .nav-col ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .footer .nav-col li {
+    margin-bottom: 0.5rem;
+  }
+  .footer .nav-col li:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--color-mint);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.footer-logo-img {
+  height: 2.5rem;
+  width: auto;
+}
+
+.footer-logo .logo-icon {
+  background: var(--color-mint);
+  color: var(--color-black);
+}
+
+.footer-tagline {
+  font-size: 0.9rem;
+  color: var(--color-gray);
+  margin: 0 0 1.5rem;
+}
+
+.footer-contact p {
+  margin: 0 0 0.35rem;
+  font-size: 0.9rem;
+  color: var(--color-gray);
+}
+
+.footer-contact a {
+  color: var(--color-mint);
+  text-decoration: none;
+}
+
+.footer-contact a:hover {
+  text-decoration: underline;
+}
+
+.contact-note {
+  font-size: 0.8rem !important;
+  color: var(--color-gray-dim) !important;
+}
+
+.copyright {
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  color: var(--color-gray-dim);
+}
+
+/* ========== 맨 위로 버튼 (2단부터 표시, 얇은 원 테두리 + 위쪽 세모, 초록) ========== */
+.btn-top {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 100;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid var(--color-mint);
+  border-radius: 50%;
+  background: var(--color-black);
+  color: var(--color-mint);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(0.5rem);
+  transition: opacity 0.25s, visibility 0.25s, transform 0.25s, border-color 0.2s, color 0.2s;
+}
+
+.btn-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.btn-top:hover,
+.btn-top:focus {
+  color: #5ae8a8;
+  border-color: #5ae8a8;
+}
+
+.btn-top:focus {
+  outline: none;
+}
+
+.btn-top-chevron {
+  color: currentColor;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 3rem;
+}
+
+.nav-col h4 {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-white);
+  margin: 0 0 0.75rem;
+}
+
+.nav-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-col li {
+  margin-bottom: 0.5rem;
+}
+
+.nav-col a {
+  color: var(--color-gray);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.nav-col a:hover {
+  color: var(--color-mint);
+}
+
+/* ========== 반응형: 태블릿 (900px 이하) ========== */
+@media (max-width: 900px) {
+  .header {
+    padding: 1rem 1.25rem;
+  }
+  .logo {
+    font-size: 2rem;
+  }
+  .logo-img {
+    height: 2.75rem;
+  }
+  .logo-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.25rem;
+  }
+  .btn-login {
+    padding: 0.55rem 0.85rem 0.3rem;
+    min-height: 36px;
+    font-size: 0.85rem;
+    line-height: 1;
+  }
+  .hero-main {
+    margin-top: 3rem;
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+  .hero-content {
+    margin-top: 1.5rem;
+  }
+  .hero-greeting {
+    font-size: 0.95rem;
+    min-height: 3.2rem;
+  }
+  .hero-mascot {
+    width: 280px;
+    height: 280px;
+    margin-bottom: 1rem;
+  }
+  .hero-cta {
+    margin-top: -1.5rem;
+  }
+  .btn-start {
+    min-width: 200px;
+    padding: 0.75rem 2rem;
+    font-size: 0.9rem;
+  }
+  .btn-start-arrow {
+    right: 1rem;
+  }
+  .hero .link-learn {
+    margin-top: 5rem;
+    font-size: 0.85rem;
+  }
+  .about {
+    padding: 2rem 1.25rem 2rem;
+  }
+  .about-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+  .about-tagline {
+    font-size: 0.95rem;
+  }
+  .steps {
+    gap: 1.5rem;
+    margin: 3rem auto 1.25rem;
+    padding: 0 0.5rem;
+  }
+  .step-card {
+    padding: 0 1.25rem 1.25rem;
+  }
+  .step-title {
+    font-size: 0.95rem;
+  }
+  .step-desc {
+    font-size: 0.8rem;
+  }
+  .step-illust {
+    min-height: 180px;
+  }
+  .step-illust img {
+    max-height: 220px;
+  }
+  .step-illust.step-2 img,
+  .step-illust.step-4 img {
+    max-height: 220px;
+  }
+  .link-app-down {
+    margin: 1.5rem auto 0;
+    font-size: 0.85rem;
+  }
+  /* 3단 모바일 레이아웃·크기는 위 900px 3단 전용 블록에서만 적용 */
+  .footer {
+    padding: 2rem 1.25rem;
+  }
+  .footer-inner {
+    gap: 2rem;
+  }
+}
+
+/* ========== 반응형: 모바일 (600px 이하) ========== */
+@media (max-width: 600px) {
+  .header {
+    padding: 0.75rem 1rem;
+  }
+  .logo {
+    font-size: 1.75rem;
+  }
+  .logo-img {
+    height: 2.25rem;
+  }
+  .logo-icon {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+  }
+  .btn-login {
+    padding: 0.45rem 0.7rem 0.25rem;
+    min-height: 32px;
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+  .hero {
+    padding: 1.5rem 1rem 2rem;
+  }
+  .hero-main {
+    margin-top: 2.5rem;
+  }
+  .hero-content {
+    margin-top: 1rem;
+  }
+  .hero-greeting {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    min-height: 2.8rem;
+  }
+  .hero-mascot {
+    width: 220px;
+    height: 220px;
+    margin-bottom: 0.75rem;
+  }
+  .hero-cta {
+    margin-top: -1rem;
+  }
+  .btn-start {
+    min-width: 100%;
+    max-width: 280px;
+    padding: 0.7rem 1.5rem;
+    font-size: 0.875rem;
+  }
+  .btn-start-arrow {
+    right: 1rem;
+  }
+  .hero .link-learn {
+    margin-top: 3.5rem;
+    font-size: 0.8rem;
+  }
+  .hero-bg .sun-corner {
+    width: 40%;
+    max-width: 140px;
+    height: 22vh;
+  }
+  .about {
+    padding: 1.5rem 1rem 1.5rem;
+  }
+  .about-label {
+    font-size: 0.8rem;
+  }
+  .about-title {
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+  }
+  .about-tagline {
+    font-size: 0.875rem;
+    margin: 0 0 1rem;
+  }
+  .steps {
+    margin: 2rem auto 1rem;
+    gap: 2rem;
+    padding: 0 1rem;
+    max-width: 360px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .step-card {
+    padding: 0 1rem 1rem;
+  }
+  .step-num {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1rem;
+    margin-top: -1.125rem;
+    margin-bottom: 0.75rem;
+  }
+  .step-title {
+    font-size: 0.9rem;
+    margin: 0 0 0.5rem;
+  }
+  .step-desc {
+    font-size: 0.75rem;
+    margin: 0 0 0.75rem;
+  }
+  .step-illust {
+    min-height: 120px;
+  }
+  .step-illust img {
+    max-height: 160px;
+  }
+  .step-illust.step-2 img,
+  .step-illust.step-4 img {
+    max-height: 160px;
+  }
+  .step-illust.step-4 img {
+    max-height: 120px;
+  }
+  .link-app-down {
+    margin: 1.25rem auto 0;
+    font-size: 0.8rem;
+  }
+  /* 3단: 600px 크기 조정 (휴대폰→문구·버튼→캐릭터 유지) */
+  .app-section { padding: 0.875rem 0.75rem 1.25rem; }
+  .app-inner { gap: 0.45rem; padding-bottom: 0.5rem; }
+  .app-section .app-inner .app-left .app-left-img { max-height: 300px; max-width: 360px; }
+  .app-left.placeholder { min-height: 120px; }
+  .app-copy .app-headline,
+  .app-copy .app-headline.app-headline-accent { font-size: 0.98rem; }
+  .app-copy .app-slogan { font-size: 0.72rem; }
+  .app-copy .app-desc { font-size: 0.68rem; }
+  .app-section .app-copy .app-buttons .app-store-link img,
+  .app-section .app-copy .app-buttons .google-play-link img { height: 38px; }
+  .app-section .app-copy .app-mascot img { max-width: 180px; max-height: 42vh; }
+  .footer {
+    padding: 1.5rem 1rem;
+  }
+  .footer-inner {
+    gap: 1.5rem;
+  }
+  .footer-logo {
+    font-size: 1.25rem;
+  }
+  .footer-tagline,
+  .footer-contact p {
+    font-size: 0.85rem;
+  }
+  .footer-nav {
+    gap: 2rem;
+  }
+  .nav-col h4 {
+    font-size: 0.85rem;
+  }
+  .nav-col a {
+    font-size: 0.85rem;
+  }
+  .copyright {
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* ========== 반응형: 소형 모바일 (400px 이하) ========== */
+@media (max-width: 400px) {
+  .hero-mascot {
+    width: 180px;
+    height: 180px;
+  }
+  .hero-greeting {
+    font-size: 0.8rem;
+    min-height: 2.6rem;
+  }
+  .about-title {
+    font-size: 1.5rem;
+  }
+  .steps {
+    max-width: 340px;
+    gap: 1.75rem;
+  }
+  .step-illust {
+    min-height: 100px;
+  }
+  .step-illust img {
+    max-height: 140px;
+  }
+  .step-illust.step-2 img,
+  .step-illust.step-4 img {
+    max-height: 140px;
+  }
+  .step-illust.step-4 img {
+    max-height: 100px;
+  }
+  /* 3단: 400px 크기 조정 */
+  .app-section .app-inner .app-left .app-left-img { max-height: 260px; max-width: 320px; }
+  .app-copy .app-headline,
+  .app-copy .app-headline.app-headline-accent { font-size: 0.9rem; }
+  .app-copy .app-slogan { font-size: 0.68rem; }
+  .app-copy .app-desc { font-size: 0.65rem; }
+  .app-section .app-copy .app-buttons .app-store-link img,
+  .app-section .app-copy .app-buttons .google-play-link img { height: 34px; }
+  .app-section .app-copy .app-mascot img { max-width: 150px; max-height: 36vh; }
+}

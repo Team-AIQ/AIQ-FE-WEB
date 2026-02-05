@@ -1,0 +1,653 @@
+/* ========== 로그인 페이지 (AIQ Design Tokens 동일) ========== */
+:root {
+  --color-black: #0a0a0a;
+  --color-mint: #3FDD90;
+  --color-teal: #41C99A;
+  --color-white: #ffffff;
+  --color-gray: rgba(255, 255, 255, 0.7);
+  --color-gray-dim: rgba(255, 255, 255, 0.5);
+  --font-display: 'Audiowide', sans-serif;
+  --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body.login-page {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  background: var(--color-black);
+  color: var(--color-white);
+  overflow-x: hidden;
+}
+
+/* 배경: 3단처럼 우주 느낌 (별 패턴, 이미지 없음) */
+.login-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--color-black);
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(2px 2px at 50px 160px, #fff, transparent),
+    radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 130px 80px, #fff, transparent);
+  background-size: 200px 200px;
+  animation: login-twinkle 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes login-twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* 왼쪽 상단 뒤로가기 버튼 (웹앱 safe-area 적용) - Link/button 크기 동일 */
+.login-back {
+  position: fixed;
+  top: max(1.5rem, env(safe-area-inset-top));
+  left: max(1.5rem, env(safe-area-inset-left));
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--color-gray);
+  text-decoration: none;
+  transition: color 0.2s;
+  box-sizing: border-box;
+}
+
+.login-back:hover {
+  color: var(--color-white);
+}
+
+/* 캐릭터 (좌측, 2번 이미지처럼 크게 하단 정렬) */
+.login-character {
+  position: fixed;
+  left: 12%;
+  bottom: 0;
+  z-index: 1;
+  width: 48%;
+  max-width: 520px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  pointer-events: none;
+}
+
+.login-character img {
+  width: 100%;
+  height: auto;
+  max-height: 90vh;
+  object-fit: contain;
+  object-position: left bottom;
+}
+
+/* 로그인 패널: 통째로 오른쪽 정렬 */
+.login-main {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: max(2rem, env(safe-area-inset-top)) max(18%, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(2rem, env(safe-area-inset-left));
+}
+
+.login-panel {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--color-white);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.login-logo-img {
+  height: 11rem;
+  width: auto;
+  display: block;
+}
+
+.login-logo.fallback .login-logo-img {
+  display: none;
+}
+
+.login-logo-fallback {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.login-logo.fallback .login-logo-fallback {
+  display: flex;
+}
+
+.login-logo .logo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--color-mint);
+  color: var(--color-black);
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+/* 로고 아래 태그라인 */
+.login-tagline {
+  font-size: 0.85rem;
+  color: var(--color-gray);
+  margin: 0 0 1rem;
+  line-height: 1.4;
+}
+
+/* 이메일로 로그인 링크 버튼 */
+.login-email-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.login-email-link-btn:hover {
+  text-decoration: underline;
+}
+
+/* 소셜 로그인: 참고 이미지처럼 컴팩트(높이 40~50px, 적당한 너비) */
+.login-social {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 이메일 로그인 폼: 소셜 버튼과 동일 너비 */
+.login-email-form {
+  width: 100%;
+  max-width: 320px;
+  margin: 1rem auto 0;
+  text-align: left;
+}
+
+.login-input-wrap {
+  position: relative;
+  margin-bottom: 0.6rem;
+}
+
+.login-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--color-white);
+  background: var(--color-black);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.login-input::placeholder {
+  color: var(--color-gray-dim);
+}
+
+.login-input:focus {
+  border-color: var(--color-white);
+}
+
+.login-input-wrap--password .login-input {
+  padding-right: 2.75rem;
+}
+
+.login-password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-gray);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.login-password-toggle:hover {
+  color: var(--color-white);
+}
+
+.login-form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.login-check-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--color-gray);
+  user-select: none;
+}
+
+/* 네모칸 안 흰색 없음, 클릭 시 체크 표시만 */
+/* 기본: 흰색 칸 / 체크 시: 초록색 */
+.login-check {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 3px;
+  background: var(--color-white);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.login-check:hover {
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.login-check:checked {
+  border-color: var(--color-mint);
+  background: var(--color-mint)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M1 5l3 3 7-6'/%3E%3C/svg%3E")
+    center / 10px 8px no-repeat;
+}
+
+.login-check-text {
+  white-space: nowrap;
+}
+
+.login-forgot {
+  font-size: 0.85rem;
+  color: var(--color-white);
+  text-decoration: none;
+}
+
+.login-forgot:hover {
+  text-decoration: underline;
+}
+
+.login-btn {
+  display: block;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  box-sizing: border-box;
+  margin-bottom: 0.6rem;
+}
+
+.login-btn:last-child {
+  margin-bottom: 0;
+}
+
+.login-btn:hover {
+  opacity: 0.95;
+}
+
+.login-btn:active {
+  transform: scale(0.98);
+}
+
+/* 비활성: 흰색 / 활성(이메일·비밀번호 입력 시): 초록색 */
+.login-btn--primary {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-black);
+  cursor: not-allowed;
+}
+
+.login-btn--primary:not(:disabled) {
+  background: var(--color-mint);
+  color: var(--color-white);
+  cursor: pointer;
+}
+
+.login-btn--primary:hover:not(:disabled) {
+  background: var(--color-teal);
+}
+
+.login-btn--primary:disabled {
+  opacity: 1;
+}
+
+/* 입력 필드 오류 상태 (오류 발생 시) */
+.login-input.login-input--error {
+  border-color: #e74c3c;
+}
+
+.login-input-error-msg {
+  font-size: 0.8rem;
+  color: #e74c3c;
+  margin-top: 0.35rem;
+  margin-bottom: 0.25rem;
+  min-height: 1.2em;
+}
+
+.login-btn--secondary {
+  background: transparent;
+  color: var(--color-white);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.login-btn--secondary:hover {
+  border-color: var(--color-white);
+}
+
+.login-social-btn {
+  display: block;
+  width: 100%;
+  text-decoration: none;
+  transition: opacity 0.2s, transform 0.15s;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.login-social-btn:hover {
+  opacity: 0.9;
+}
+
+.login-social-btn:active {
+  transform: scale(0.98);
+}
+
+.login-social-btn img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 44px;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* 약관 문구: 이용약관·개인정보처리방침 링크 #45D38E */
+.login-agreement {
+  font-size: 0.75rem;
+  color: var(--color-gray-dim);
+  line-height: 1.6;
+  margin: 0 0 1.25rem;
+  padding: 0 0.5rem;
+}
+
+.login-agreement .login-link {
+  color: #45D38E;
+  text-decoration: none;
+}
+
+.login-agreement .login-link:hover {
+  text-decoration: underline;
+}
+
+/* 이메일 로그인/가입 링크 (초록 아님, Pretendard, 작게, 아래로 많이) */
+.login-email-links {
+  font-size: 0.8rem;
+  font-family: var(--font-body);
+  color: var(--color-gray);
+  margin-top: 4rem;
+}
+
+.login-email-links a {
+  color: var(--color-gray);
+  text-decoration: none;
+}
+
+.login-email-links a:hover {
+  text-decoration: underline;
+}
+
+.login-email-links .sep {
+  margin: 0 0.5rem;
+  color: var(--color-gray-dim);
+}
+
+/* 웹앱/모바일: 콘텐츠 위·캐릭터 밑 레이아웃, safe-area */
+@media (max-width: 900px) {
+  body.login-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  .login-main {
+    order: 1;
+    flex: 1 1 auto;
+    min-height: 0;
+    justify-content: center;
+    padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  }
+
+  .login-character {
+    order: 2;
+    position: relative;
+    flex-shrink: 0;
+    width: 100%;
+    max-width: none;
+    left: auto;
+    bottom: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .login-character img {
+    max-height: 28vh;
+    width: auto;
+    max-width: 320px;
+  }
+}
+
+/* 반응형: 2번 이미지 비율 유지 */
+@media (max-width: 768px) {
+  .login-character img {
+    max-height: 26vh;
+    max-width: 280px;
+  }
+  .login-logo-img {
+    height: 8rem;
+  }
+  .login-social,
+  .login-email-form {
+    max-width: 280px;
+  }
+  .login-social-btn img {
+    max-height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-character img {
+    max-height: 24vh;
+    max-width: 240px;
+  }
+  .login-logo-img {
+    height: 6.5rem;
+  }
+}
+
+/* ========== 회원가입 페이지 ========== */
+.signup-content {
+  max-width: 320px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.signup-title {
+  font-family: var(--font-body);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-white);
+  margin: 0 0 1.5rem;
+  text-align: left;
+}
+
+.signup-form {
+  width: 100%;
+  text-align: left;
+}
+
+.signup-input-wrap {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.signup-input-wrap--password .login-input {
+  padding-right: 2.75rem;
+}
+
+.signup-password-inner {
+  position: relative;
+}
+
+.signup-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--color-white);
+  margin-bottom: 0.4rem;
+}
+
+.signup-email-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.signup-email-row .login-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.signup-dup-btn {
+  flex-shrink: 0;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--color-mint);
+  background: transparent;
+  border: 1px solid var(--color-mint);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.signup-dup-btn:hover {
+  color: var(--color-teal);
+  border-color: var(--color-teal);
+}
+
+.signup-dup-btn--error {
+  border-color: #e74c3c;
+  background: transparent;
+  color: #e74c3c;
+}
+
+.signup-dup-btn--error:hover {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.signup-hint {
+  font-size: 0.8rem;
+  color: var(--color-mint);
+  margin-top: 0.35rem;
+  margin-bottom: 0;
+}
+
+.signup-terms-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--color-white);
+  user-select: none;
+}
+
+.signup-terms-text {
+  flex: 1;
+}
+
+.signup-terms-link {
+  font-size: 0.85rem;
+  color: var(--color-gray-dim);
+  text-decoration: none;
+}
+
+.signup-terms-link:hover {
+  color: var(--color-gray);
+  text-decoration: underline;
+}
+
+.signup-submit-btn {
+  margin-top: 0.5rem;
+}
+
+.signup-success-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  padding: 1rem 2rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-white);
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
