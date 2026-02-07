@@ -6,6 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="bb02ebcc-22c2-4fb5-baca-b54fcde4faaa" name="변경" comment="지성 수정 - 리포트 저장 , 나머지 기능 다 됨">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,8 +30,8 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Team-AIQ/AIQ-UserTest-FE.git&quot;,
-    &quot;accountId&quot;: &quot;dcb8d252-8298-4d6d-9811-c5cd94531785&quot;
+    &quot;url&quot;: &quot;https://github.com/Team-AIQ/AIQ-FE-WEB.git&quot;,
+    &quot;accountId&quot;: &quot;0f60603e-2f5e-4278-92b9-41fd2bff7e9f&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -50,12 +52,13 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "yunju-fix",
+    "git-widget-placeholder": "feature/Combin__Backend",
     "ignore.virus.scanning.warn.message": "true",
     "javascript.preferred.runtime.type.id": "node",
     "js.debugger.nextJs.config.created.client": "true",
     "js.debugger.nextJs.config.created.server": "true",
     "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/dev/AIQ-UserTest-FE/public/images",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -64,7 +67,7 @@
     "nodejs_package_manager_path": "pnpm",
     "settings.editor.selected.configurable": "configurable.group.tools",
     "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "C:\\AIQ\\AIQ-UserTest-FE\\node_modules\\typescript\\lib",
+    "ts.external.directory.path": "C:\\AIQ\\AIQ-FE-WEB\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -100,7 +103,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-WS-252.27397.92" />
+        <option value="bundled-jdk-30f59d01ecdd-26cb7f24e5b0-intellij.indexing.shared.core-IU-253.29346.138" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.29346.138" />
       </set>
     </attachedChunks>
   </component>
@@ -115,6 +119,9 @@
       <workItem from="1768642414381" duration="1421000" />
       <workItem from="1768660636140" duration="9719000" />
       <workItem from="1768693595868" duration="4670000" />
+      <workItem from="1770303542396" duration="653000" />
+      <workItem from="1770347477092" duration="3338000" />
+      <workItem from="1770435355464" duration="7223000" />
     </task>
     <task id="LOCAL-00001" summary="리포트 나오지 않는 오류 해결">
       <option name="closed" value="true" />
@@ -135,7 +142,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="feature/Combin_Backend" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
