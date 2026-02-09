@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { requestSignupVerifyEmail, signUp } from "@/lib/api";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -19,8 +20,24 @@ export default function SignupPage() {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [emailVerified, setEmailVerified] = useState(false);
+  const [sendingMail, setSendingMail] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleEmailDuplicateCheck = () => {
+  // 메일에서 인증 링크 클릭 후 리다이렉트: ?verified=1&email=xxx
+  useEffect(() => {
+    const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+    if (params.get("verified") === "1" && params.get("email")) {
+      const verifiedEmail = params.get("email") ?? "";
+      setEmail(verifiedEmail);
+      setEmailVerified(true);
+      setEmailChecked(true);
+      setEmailError("");
+      // URL 정리 (히스토리에서 query 제거)
+      window.history.replaceState({}, "", "/signup");
+    }
+  }, []);
+
+  const handleEmailDuplicateCheck = async () => {
     if (!email.trim()) {
       setEmailError("이메일을 입력해주세요");
       return;
@@ -29,15 +46,16 @@ export default function SignupPage() {
       setEmailError("이메일이 올바르지 않습니다");
       return;
     }
-    // TODO: 실제 중복 확인 API 호출
-    // 시뮬레이션: aiq@email.com은 이미 존재
-    if (email === "aiq@email.com") {
-      setEmailError("이미 존재하는 이메일 입니다");
-      setEmailChecked(false);
-    } else {
-      setEmailError("");
+    setEmailError("");
+    setSendingMail(true);
+    try {
+      await requestSignupVerifyEmail(email.trim());
       setEmailChecked(true);
-      setEmailVerified(true);
+      setEmailVerified(false);
+    } catch (err) {
+      setEmailError(err instanceof Error ? err.message : "인증 메일 발송에 실패했습니다.");
+    } finally {
+      setSendingMail(false);
     }
   };
 
@@ -47,15 +65,18 @@ export default function SignupPage() {
     return regex.test(pwd);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     let hasError = false;
 
+    if (!nickname.trim()) {
+      hasError = true;
+    }
     if (!email.trim()) {
       setEmailError("이메일을 입력해주세요");
       hasError = true;
-    } else if (!emailChecked) {
-      setEmailError("이메일 중복확인을 해주세요");
+    } else if (!emailVerified) {
+      setEmailError(emailChecked ? "메일에서 인증 링크를 클릭해주세요." : "이메일 중복확인을 해주세요");
       hasError = true;
     } else {
       setEmailError("");
@@ -83,11 +104,18 @@ export default function SignupPage() {
     }
 
     if (!hasError) {
-      // TODO: 실제 회원가입 API 호출
-      setShowSuccess(true);
-      setTimeout(() => {
-        router.replace("/login?view=email");
-      }, 2000);
+      setSubmitting(true);
+      try {
+        await signUp({ nickname: nickname.trim(), email: email.trim(), password });
+        setShowSuccess(true);
+        setTimeout(() => {
+          router.replace("/login?view=email");
+        }, 2000);
+      } catch (err) {
+        setEmailError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
+      } finally {
+        setSubmitting(false);
+      }
     }
   };
 
@@ -152,12 +180,15 @@ export default function SignupPage() {
                   type="button"
                   className={`signup-dup-btn${emailError ? " signup-dup-btn--error" : ""}`}
                   onClick={handleEmailDuplicateCheck}
+                  disabled={sendingMail}
                 >
-                  중복확인
+                  {sendingMail ? "발송 중…" : "중복확인"}
                 </button>
               </div>
-              {emailVerified && !emailError && (
-                <p className="signup-hint">메일에서 인증을 눌러주세요</p>
+              {emailChecked && !emailError && (
+                <p className="signup-hint">
+                  {emailVerified ? "이메일 인증이 완료되었습니다." : "메일에서 인증을 눌러주세요"}
+                </p>
               )}
               {emailError && <p className="login-input-error-msg" role="alert">{emailError}</p>}
             </div>
@@ -266,9 +297,9 @@ export default function SignupPage() {
             <button
               type="submit"
               className="login-btn login-btn--primary signup-submit-btn"
-              disabled={!email.trim() || !password || !confirmPassword || !agreeTerms || !emailChecked || !!emailError || !!confirmPasswordError}
+              disabled={!nickname.trim() || !email.trim() || !password || !confirmPassword || !agreeTerms || !emailVerified || !!emailError || !!confirmPasswordError || submitting}
             >
-              회원가입
+              {submitting ? "가입 중…" : "회원가입"}
             </button>
           </form>
           </div>

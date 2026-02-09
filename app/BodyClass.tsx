@@ -13,7 +13,7 @@ export function BodyClass() {
     } else if (pathname === "/chat") {
       document.body.classList.add("chat-page");
       document.body.classList.remove("login-page", "onboarding-page");
-    } else if (pathname === "/login" || pathname === "/signup") {
+    } else if (pathname === "/login" || pathname.startsWith("/login/") || pathname === "/signup") {
       document.body.classList.add("login-page");
       document.body.classList.remove("onboarding-page", "chat-page");
     } else {

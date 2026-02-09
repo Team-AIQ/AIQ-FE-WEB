@@ -31,3 +31,7 @@ yarn-error.log*
 agent-transcripts/
 *.cursor-transcript
 .cursorrules
+
+# Environment variables
+.env.local
+.env*.local

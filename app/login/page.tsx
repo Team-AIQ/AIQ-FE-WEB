@@ -1,15 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const initialView = searchParams.get("view") === "email" ? "email" : "social";
-  const [view, setView] = useState<"social" | "email">(initialView);
+  const [view, setView] = useState<"social" | "email">("social");
   const [showPassword, setShowPassword] = useState(false);
+
+  // 클라이언트에서만 ?view=email 반영 (useSearchParams는 서버에서 500 유발)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("view") === "email") setView("email");
+  }, []);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [email, setEmail] = useState("");
@@ -142,7 +147,7 @@ export default function LoginPage() {
                   <input type="checkbox" className="login-check" />
                   <span className="login-check-text">자동 로그인</span>
                 </label>
-                <a href="#" className="login-forgot">비밀번호찾기</a>
+                <Link href="/login/forgot-password" className="login-forgot">비밀번호찾기</Link>
               </div>
               <button
                 type="button"

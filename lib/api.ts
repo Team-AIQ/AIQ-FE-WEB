@@ -137,3 +137,89 @@ export async function apiPost<T = unknown>(path: string, body?: unknown): Promis
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }
+
+/**
+ * 매직 링크 메일 발송 (POST /api/auth/email/request)
+ * @param email 수신 이메일
+ * @param purpose "signup" | undefined — signup 시 이메일 인증 링크, 생략 시 비밀번호 재설정
+ */
+async function requestMagicLink(email: string, purpose?: string): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/api/auth/email/request`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, ...(purpose ? { purpose } : {}) }),
+    });
+  } catch (e) {
+    throw new Error(
+      "서버에 연결할 수 없습니다. 백엔드가 실행 중인지, NEXT_PUBLIC_API_URL이 맞는지 확인해주세요."
+    );
+  }
+  if (!res.ok) {
+    const text = await res.text();
+    let msg = "메일 발송에 실패했습니다.";
+    if (res.status === 404) {
+      msg = "요청한 API를 찾을 수 없습니다. 백엔드가 실행 중인지, NEXT_PUBLIC_API_URL(예: http://localhost:8080)이 맞는지 확인해주세요.";
+    } else {
+      try {
+        const json = JSON.parse(text);
+        if (typeof json.message === "string") msg = json.message;
+        else if (typeof json.error === "string") msg = json.error;
+      } catch {
+        if (text) msg = text;
+      }
+    }
+    throw new Error(msg);
+  }
+}
+
+/** 비밀번호 재설정용 매직 링크 */
+export async function requestMagicLinkEmail(email: string): Promise<void> {
+  return requestMagicLink(email);
+}
+
+/** 회원가입 이메일 인증용 매직 링크 (메일에서 링크 클릭 시 회원가입 페이지로 리다이렉트) */
+export async function requestSignupVerifyEmail(email: string): Promise<void> {
+  return requestMagicLink(email, "signup");
+}
+
+/**
+ * 회원가입 (POST /api/auth/signup) — 이메일 인증 완료 후 호출
+ */
+export async function signUp(data: { nickname: string; email: string; password: string }): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/auth/signup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    let msg = "회원가입에 실패했습니다.";
+    try {
+      const json = JSON.parse(text);
+      if (typeof json.message === "string") msg = json.message;
+    } catch {
+      if (text) msg = text;
+    }
+    throw new Error(msg);
+  }
+}
+
+/** report 등에서 사용 (axios 스타일: response.data) */
+export const api = {
+  get: async (url: string) => {
+    const res = await apiFetch(url);
+    const data = await res.json().catch(() => ({}));
+    return { data };
+  },
+  post: async (url: string, body?: unknown) => {
+    const fullUrl = url.startsWith("http") ? url : `${API_BASE}${url.startsWith("/") ? url : `/${url}`}`;
+    const res = await apiFetch(fullUrl, {
+      method: "POST",
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json().catch(() => ({}));
+    return { data };
+  },
+};

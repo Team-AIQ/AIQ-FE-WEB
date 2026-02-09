@@ -231,13 +231,20 @@ body.login-page {
   padding-right: 2.75rem;
 }
 
+.login-password-inner {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
 .login-password-toggle {
   position: absolute;
   right: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
   width: 28px;
   height: 28px;
+  margin: auto 0;
   padding: 0;
   border: none;
   background: none;
@@ -247,6 +254,7 @@ body.login-page {
   align-items: center;
   justify-content: center;
   transition: color 0.2s;
+  z-index: 1;
 }
 
 .login-password-toggle:hover {
@@ -310,6 +318,113 @@ body.login-page {
 
 .login-forgot:hover {
   text-decoration: underline;
+}
+
+/* 비밀번호 재설정 화면 */
+.login-panel--forgot {
+  text-align: left;
+}
+.login-forgot-title {
+  font-family: var(--font-body);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-mint);
+  margin: 0 0 0.5rem;
+}
+
+.login-forgot-desc {
+  font-size: 0.9rem;
+  color: var(--color-white);
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.login-forgot-form {
+  text-align: left;
+}
+
+.login-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--color-white);
+  margin-bottom: 0.4rem;
+}
+
+/* 이메일 코드 입력 화면 (step 2) */
+.login-forgot-code-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.login-forgot-desc--code {
+  margin: 0;
+  flex: 1;
+}
+.login-forgot-timer {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-white);
+  flex-shrink: 0;
+}
+/* 코드 입력 칸: 버튼 영역과 같은 가로 폭, 칸 간격 동일 */
+.login-forgot-code-inputs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  width: 100%;
+}
+.login-forgot-code-input {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 0;
+  height: 2.75rem;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--color-white);
+  background: var(--color-black);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.login-forgot-code-input:focus {
+  border-color: var(--color-mint);
+}
+/* 재전송·완료 버튼: 가로·세로 동일 크기 */
+.login-forgot-code-buttons {
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+}
+.login-forgot-btn-resend,
+.login-forgot-btn-complete {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-bottom: 0;
+  min-height: 2.75rem;
+  height: 2.75rem;
+  padding: 0 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-btn--disabled,
+.login-btn--disabled:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--color-gray);
+  cursor: not-allowed;
+  opacity: 1;
+}
+.login-forgot-resend-msg {
+  font-size: 0.85rem;
+  color: var(--color-gray-dim);
+  margin: 0.5rem 0 0;
 }
 
 .login-btn {
@@ -650,4 +765,141 @@ body.login-page {
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* ========== 회원가입 페이지 반응형 ========== */
+@media (max-width: 900px) {
+  .signup-content {
+    max-width: 300px;
+  }
+
+  .signup-title {
+    font-size: 1.35rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .signup-label {
+    font-size: 0.85rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .signup-input-wrap {
+    margin-bottom: 0.875rem;
+  }
+
+  .signup-dup-btn {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.85rem;
+  }
+
+  .signup-terms-wrap {
+    font-size: 0.85rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .signup-terms-link {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .signup-content {
+    max-width: 280px;
+  }
+
+  .signup-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .signup-label {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .signup-input-wrap {
+    margin-bottom: 0.75rem;
+  }
+
+  .signup-email-row {
+    gap: 0.4rem;
+  }
+
+  .signup-dup-btn {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .signup-hint {
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+  }
+
+  .signup-terms-wrap {
+    font-size: 0.8rem;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .signup-terms-link {
+    font-size: 0.75rem;
+  }
+
+  .signup-submit-btn {
+    margin-top: 0.4rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .signup-content {
+    max-width: 260px;
+  }
+
+  .signup-title {
+    font-size: 1.15rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .signup-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .signup-input-wrap {
+    margin-bottom: 0.625rem;
+  }
+
+  .signup-email-row {
+    gap: 0.35rem;
+    flex-direction: column;
+  }
+
+  .signup-email-row .login-input {
+    width: 100%;
+  }
+
+  .signup-dup-btn {
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .signup-hint {
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+  }
+
+  .signup-terms-wrap {
+    font-size: 0.75rem;
+    gap: 0.3rem;
+    margin-bottom: 0.625rem;
+  }
+
+  .signup-terms-link {
+    font-size: 0.7rem;
+  }
+
+  .signup-submit-btn {
+    margin-top: 0.3rem;
+  }
 }

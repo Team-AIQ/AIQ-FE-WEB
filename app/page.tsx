@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import ServiceIntroModal from "@/components/ServiceIntroModal";
 
 const TYPEWRITER_TEXT =
   "만나서 반가워! 나는 AIQ 행성에서 온 피클이야\n너의 장바구니 속 고민을 나에게 말해줘";
@@ -81,6 +82,7 @@ export default function HomePage() {
   const hasLeftHeroRef = useRef(false);
   const hasLeftAboutRef = useRef(false);
   const hasLeftAppRef = useRef(false);
+  const [isServiceIntroOpen, setIsServiceIntroOpen] = useState(false);
 
   const { displayText, showCursor, restart } = useTypewriter(
     TYPEWRITER_TEXT,
@@ -118,7 +120,7 @@ export default function HomePage() {
     let rafId: number;
     const updateVisibility = () => {
       rafId = requestAnimationFrame(() => {
-        if (!about) return;
+        if (!about || !btn) return;
         const rect = about.getBoundingClientRect();
         if (rect.top < window.innerHeight) {
           btn.classList.add("is-visible");
@@ -135,7 +137,7 @@ export default function HomePage() {
     updateVisibility();
     return () => {
       window.removeEventListener("scroll", handler);
-      cancelAnimationFrame(rafId);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);
 
@@ -370,10 +372,22 @@ export default function HomePage() {
             <p className="app-slogan">더 이상의 비교는 생략, 확신만 남는 쇼핑</p>
             <p className="app-desc">지구인을 위한 대화형 AI 쇼핑 어시스턴트, AIQ</p>
             <div className="app-buttons">
-              <a href="#" className="app-store-link" aria-label="App Store에서 다운로드">
+              <a
+                href={process.env.NEXT_PUBLIC_APP_STORE_URL ?? "https://www.apple.com/kr/app-store/"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="app-store-link"
+                aria-label="App Store에서 다운로드"
+              >
                 <img src="/image/app-store-btn.png" alt="Download on the App Store" />
               </a>
-              <a href="#" className="google-play-link" aria-label="Google Play에서 다운로드">
+              <a
+                href={process.env.NEXT_PUBLIC_GOOGLE_PLAY_URL ?? "https://play.google.com/store/apps"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="google-play-link"
+                aria-label="Google Play에서 다운로드"
+              >
                 <img src="/image/google-play-btn.png" alt="GET IT ON Google Play" />
               </a>
             </div>
@@ -426,10 +440,18 @@ export default function HomePage() {
               <h4>서비스</h4>
               <ul>
                 <li>
-                  <a href="#">서비스 소개</a>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsServiceIntroOpen(true);
+                    }}
+                  >
+                    서비스 소개
+                  </a>
                 </li>
                 <li>
-                  <a href="#">회원가입</a>
+                  <Link href="/signup">회원가입</Link>
                 </li>
                 <li>
                   <Link href="/login">로그인</Link>
@@ -467,6 +489,11 @@ export default function HomePage() {
           <path d="M0 10 L6 0 L12 10" fill="none" stroke="currentColor" strokeWidth={1} />
         </svg>
       </button>
+
+      <ServiceIntroModal
+        isOpen={isServiceIntroOpen}
+        onClose={() => setIsServiceIntroOpen(false)}
+      />
     </>
   );
 }

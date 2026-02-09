@@ -121,7 +121,7 @@ export default function ChatPage() {
             <p className="chat-welcome">
               만나서 반가워! 난 피클이야
               <br />
-              너의 장바구니를 비워줄게 필요한 제품을 말해봐
+              <span className="chat-welcome-line2">너의 장바구니를 비워줄게 필요한 제품을 말해봐</span>
             </p>
             <div className="chat-character-wrap">
               <div className="chat-character">
