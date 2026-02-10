@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import {useEffect, useState} from "react";
+import {getUserNickname} from "@/lib/auth";
 
 interface Message {
   id: number;
@@ -14,6 +15,15 @@ export default function ChatPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [showWelcome, setShowWelcome] = useState(true);
+
+  const [userNickname, setUserNickname] = useState<string>("사용자");
+
+  useEffect(() => {
+    const nickname = getUserNickname();
+    if (nickname) {
+      setUserNickname(nickname);
+    }
+  }, []);
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
@@ -111,7 +121,7 @@ export default function ChatPage() {
         </Link>
         <div className="chat-user-box onboarding-user-box">
           <img src="/image/user-icon.png" alt="" className="onboarding-user-icon" aria-hidden />
-          <span className="onboarding-user-name">멋쟁이 요리사</span>
+          <span className="onboarding-user-name">{userNickname}</span>
         </div>
       </header>
 

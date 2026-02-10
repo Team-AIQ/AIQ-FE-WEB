@@ -2,9 +2,30 @@
  * 토큰 저장소 (localStorage)
  * 보안이 우려되면 쿠키(HttpOnly 등)로 교체 가능
  */
+import { jwtDecode } from "jwt-decode";
 
 const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
+
+interface TokenPayload {
+  userId: number;
+  nickname: string; // 백엔드에서 추가한 필드명과 일치해야 함
+  auth: string;
+  exp: number;
+}
+
+export function getUserNickname(): string | null {
+  const token = getAccessToken();
+  if (!token) return null;
+
+  try {
+    const decoded = jwtDecode<TokenPayload>(token);
+    return decoded.nickname || null;
+  } catch (error) {
+    console.error("토큰 디코딩 실패:", error);
+    return null;
+  }
+}
 
 export function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;

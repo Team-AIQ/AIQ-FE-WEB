@@ -15,7 +15,7 @@ export default function OAuthCallbackPage() {
     if (accessToken && refreshToken) {
       setTokens(accessToken, refreshToken);
       // URL에 토큰이 남지 않도록 replace로 메인 페이지로 이동
-      router.replace("/");
+      router.replace("/chat");
     } else {
       router.replace("/login");
     }
