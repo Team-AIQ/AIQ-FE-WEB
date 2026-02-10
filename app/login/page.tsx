@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import {apiFetch} from "@/lib/api";
+import {setTokens} from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -19,7 +21,62 @@ export default function LoginPage() {
   const [passwordError, setPasswordError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isRememberMe, setIsRememberMe] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const handleLogin = async () => {
+    // 1. 유효성 검사
+    let hasError = false;
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("이메일이 올바르지 않습니다");
+      hasError = true;
+    }
+    if (!password.trim()) {
+      setPasswordError("비밀번호를 입력해주세요.");
+      hasError = true;
+    }
+    if (hasError) return;
 
+    setIsSubmitting(true);
+
+    try {
+      console.log("로그인 시도:", email); // 디버깅용 로그
+
+      const response = await apiFetch("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password , isRememberMe}),
+      });
+
+      console.log("서버 응답 상태:", response.status); // 응답 코드 확인 (200, 404, 500 등)
+
+      if (response.ok) {
+        const resData = await response.json();
+        console.log("받은 데이터:", resData); // 토큰이 어떻게 오는지 확인
+
+        // 3. 토큰 저장 (서버가 보내주는 키 값에 맞춰야 함)
+        // 예: data.result.accessToken 일 수도 있고 data.accessToken 일 수도 있음
+        const tokenData = resData.data || resData;
+        const accessToken = tokenData.accessToken;
+        const refreshToken = tokenData.refreshToken;
+
+        if (accessToken && refreshToken) {
+          setTokens(accessToken, refreshToken);
+          // 메인 페이지로 이동 (새로고침 효과를 위해 window.location 사용)
+          window.location.href = "/";
+        } else {
+          console.error("토큰 구조가 다릅니다:", resData);
+          alert("로그인에 성공했으나 토큰을 찾을 수 없습니다.");
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert(errorData.message || "이메일 또는 비밀번호가 일치하지 않습니다.");
+      }
+    } catch (error) {
+      console.error("로그인 에러 발생:", error);
+      alert("서버와 연결할 수 없습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <>
       <div className="login-bg" role="presentation" />
@@ -144,41 +201,23 @@ export default function LoginPage() {
               </div>
               <div className="login-form-options">
                 <label className="login-check-wrap">
-                  <input type="checkbox" className="login-check" />
+                  <input
+                      type="checkbox"
+                      className="login-check"
+                      checked={isRememberMe}
+                      onChange={(e) => setIsRememberMe(e.target.checked)}
+                  />
                   <span className="login-check-text">자동 로그인</span>
                 </label>
                 <Link href="/login/forgot-password" className="login-forgot">비밀번호찾기</Link>
               </div>
               <button
-                type="button"
-                className="login-btn login-btn--primary"
-                disabled={!email.trim() || !password.trim()}
-                onClick={() => {
-                  let hasError = false;
-                  if (!email.trim()) {
-                    setEmailError("이메일이 올바르지 않습니다");
-                    hasError = true;
-                  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                    setEmailError("이메일이 올바르지 않습니다");
-                    hasError = true;
-                  } else {
-                    setEmailError("");
-                  }
-                  if (!password.trim()) {
-                    setPasswordError("비밀번호가 올바르지 않습니다.");
-                    hasError = true;
-                  } else {
-                    setPasswordError("");
-                  }
-                  if (!hasError) {
-                    setEmailError("");
-                    setPasswordError("");
-                    // TODO: 실제 로그인 API 호출
-                    router.replace("/onboarding");
-                  }
-                }}
+                  type="button"
+                  className="login-btn login-btn--primary"
+                  disabled={isSubmitting}
+                  onClick={handleLogin}
               >
-                로그인
+                {isSubmitting ? "로그인 중..." : "로그인"}
               </button>
               <Link href="/signup" className="login-btn login-btn--secondary">
                 회원가입

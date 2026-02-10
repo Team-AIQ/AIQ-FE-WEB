@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import ServiceIntroModal from "@/components/ServiceIntroModal";
+import { isAuthenticated, clearTokens } from "@/lib/auth";
+import {useRouter} from "next/navigation";
 
 const TYPEWRITER_TEXT =
   "만나서 반가워! 나는 AIQ 행성에서 온 피클이야\n너의 장바구니 속 고민을 나에게 말해줘";
@@ -84,11 +86,31 @@ export default function HomePage() {
   const hasLeftAppRef = useRef(false);
   const [isServiceIntroOpen, setIsServiceIntroOpen] = useState(false);
 
+  const router = useRouter(); // 3. router 인스턴스 생성
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 4. 로그인 상태 추가
+
   const { displayText, showCursor, restart } = useTypewriter(
     TYPEWRITER_TEXT,
     TYPEWRITER_START_DELAY
   );
+  useEffect(() => {
+    setIsLoggedIn(isAuthenticated());
 
+    // 기존 스크롤 초기화 로직...
+    if (window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
+  // 6. 로그아웃 핸들러 추가
+  const handleLogout = () => {
+    if (confirm("로그아웃 하시겠습니까?")) {
+      clearTokens();
+      setIsLoggedIn(false);
+      router.push("/"); // 홈으로 이동하여 상태 반영
+    }
+  };
   const scrollToSection = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const target = document.getElementById(id);
@@ -221,9 +243,20 @@ export default function HomePage() {
               <span className="logo-text">AIQ</span>
             </span>
           </Link>
-          <Link href="/login" className="btn-login">
-            로그인
-          </Link>
+          {isLoggedIn ? (
+              <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="btn-login"
+                  style={{ cursor: 'pointer', background: 'none', border: '1px solid #fff', color: '#fff' }}
+              >
+                로그아웃
+              </button>
+          ) : (
+              <Link href="/login" className="btn-login">
+                로그인
+              </Link>
+          )}
         </header>
 
         <div className="hero-main">
@@ -454,7 +487,16 @@ export default function HomePage() {
                   <Link href="/signup">회원가입</Link>
                 </li>
                 <li>
-                  <Link href="/login">로그인</Link>
+                  {isLoggedIn ? (
+                      <button
+                          onClick={handleLogout}
+                          style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0, font: 'inherit' }}
+                      >
+                        로그아웃
+                      </button>
+                  ) : (
+                      <Link href="/login">로그인</Link>
+                  )}
                 </li>
               </ul>
             </div>

@@ -9,8 +9,9 @@ const REFRESH_TOKEN_KEY = "refreshToken";
 
 interface TokenPayload {
   userId: number;
-  nickname: string; // 백엔드에서 추가한 필드명과 일치해야 함
-  auth: string;
+  nickname: string; // 백엔드에서 넣은 키 값
+  auth: string;     // 권한 (ROLE_USER 등)
+  sub: string;      // 이메일 (백엔드 setSubject)
   exp: number;
 }
 
