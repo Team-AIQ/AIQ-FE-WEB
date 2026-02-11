@@ -53,3 +53,15 @@ export function clearTokens(): void {
 export function isAuthenticated(): boolean {
   return !!getAccessToken();
 }
+export function getUserId(): number | null {
+  const token = getAccessToken();
+  if (!token) return null;
+
+  try {
+    const decoded = jwtDecode<TokenPayload>(token);
+    return decoded.userId || null;
+  } catch (error) {
+    console.error("토큰 디코딩 실패:", error);
+    return null;
+  }
+}

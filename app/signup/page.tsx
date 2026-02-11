@@ -169,6 +169,7 @@ export default function SignupPage() {
                   placeholder="ex. aiq@email.com"
                   autoComplete="email"
                   value={email}
+                  readOnly={emailVerified}
                   onChange={(e) => {
                     setEmail(e.target.value);
                     setEmailError("");
@@ -177,12 +178,12 @@ export default function SignupPage() {
                   }}
                 />
                 <button
-                  type="button"
-                  className={`signup-dup-btn${emailError ? " signup-dup-btn--error" : ""}`}
-                  onClick={handleEmailDuplicateCheck}
-                  disabled={sendingMail}
+                    type="button"
+                    className={`signup-dup-btn ${emailVerified ? 'signup-dup-btn--verified' : ''}`}
+                    onClick={handleEmailDuplicateCheck}
+                    disabled={sendingMail || emailVerified} // 💡 인증 완료 시 중복확인 재발송 차단
                 >
-                  {sendingMail ? "발송 중…" : "중복확인"}
+                  {sendingMail ? "발송 중…" : emailVerified ? "인증완료" : "중복확인"}
                 </button>
               </div>
               {emailChecked && !emailError && (

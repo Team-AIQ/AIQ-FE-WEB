@@ -16,6 +16,13 @@ export default function LoginPage() {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("view") === "email") setView("email");
+
+    // 2. 💡 추가: URL에 email 파라미터가 있으면 자동으로 state에 입력
+    const emailFromUrl = params.get("email");
+    if (emailFromUrl) {
+      setEmail(emailFromUrl);
+      setView("email"); // 이메일 입력 화면으로 즉시 전환
+    }
   }, []);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");

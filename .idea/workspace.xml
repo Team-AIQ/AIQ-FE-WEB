@@ -4,11 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb02ebcc-22c2-4fb5-baca-b54fcde4faaa" name="변경" comment="/chat 페이지에 사용자 닉네임 뜨게 완료">
+    <list default="true" id="bb02ebcc-22c2-4fb5-baca-b54fcde4faaa" name="변경" comment="/chat 페이지에 사용자 닉네임 뜨게 완료&#10;=&gt; 이메일 로그인도 가능하게 구현">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/chat/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/chat/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/signup/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/signup/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/api.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/auth.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/auth.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,7 +127,8 @@
       <workItem from="1770303542396" duration="653000" />
       <workItem from="1770347477092" duration="3338000" />
       <workItem from="1770435355464" duration="9708000" />
-      <workItem from="1770714102523" duration="8934000" />
+      <workItem from="1770714102523" duration="19798000" />
+      <workItem from="1770777328151" duration="6020000" />
     </task>
     <task id="LOCAL-00001" summary="리포트 나오지 않는 오류 해결">
       <option name="closed" value="true" />
@@ -149,7 +154,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770719032285</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="/chat 페이지에 사용자 닉네임 뜨게 완료&#10;=&gt; 이메일 로그인도 가능하게 구현">
+      <option name="closed" value="true" />
+      <created>1770726694810</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1770726694810</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -160,19 +173,7 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="FILTERS">
-                <map>
-                  <entry key="branch">
-                    <value>
-                      <list>
-                        <option value="feature/Combin_Backend" />
-                      </list>
-                    </value>
-                  </entry>
-                </map>
-              </option>
-            </State>
+            <State />
           </value>
         </entry>
       </map>
@@ -182,6 +183,7 @@
     <MESSAGE value="리포트 나오지 않는 오류 해결" />
     <MESSAGE value="소셜 로그인 연도 완료" />
     <MESSAGE value="/chat 페이지에 사용자 닉네임 뜨게 완료" />
-    <option name="LAST_COMMIT_MESSAGE" value="/chat 페이지에 사용자 닉네임 뜨게 완료" />
+    <MESSAGE value="/chat 페이지에 사용자 닉네임 뜨게 완료&#10;=&gt; 이메일 로그인도 가능하게 구현" />
+    <option name="LAST_COMMIT_MESSAGE" value="/chat 페이지에 사용자 닉네임 뜨게 완료&#10;=&gt; 이메일 로그인도 가능하게 구현" />
   </component>
 </project>

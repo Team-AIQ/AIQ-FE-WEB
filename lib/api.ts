@@ -143,29 +143,35 @@ export async function apiPost<T = unknown>(path: string, body?: unknown): Promis
  * @param email 수신 이메일
  * @param purpose "signup" | undefined — signup 시 이메일 인증 링크, 생략 시 비밀번호 재설정
  */
-async function requestMagicLink(email: string, purpose?: string): Promise<void> {
+async function requestMagicLink(email: string, origin: string = "web"): Promise<void> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}/api/auth/email/request`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, ...(purpose ? { purpose } : {}) }),
+    // 1. 경로 수정: /email/request -> /email-request
+    // 2. 전달 방식 수정: JSON 바디 대신 Query Parameter 사용 (@RequestParam 대응)
+    const url = `${API_BASE}/api/auth/email-request?email=${encodeURIComponent(email)}&origin=${origin}`;
+
+    res = await fetch(url, {
+      method: "POST", // 백엔드 @PostMapping 확인됨
+      headers: {
+        // Query Parameter 방식이므로 JSON 헤더는 필요 없지만, 관례상 두어도 무방합니다.
+        "Content-Type": "application/json",
+      },
     });
   } catch (e) {
-    throw new Error(
-      "서버에 연결할 수 없습니다. 백엔드가 실행 중인지, NEXT_PUBLIC_API_URL이 맞는지 확인해주세요."
-    );
+    throw new Error("서버에 연결할 수 없습니다. 백엔드 주소를 확인해주세요.");
   }
+
   if (!res.ok) {
     const text = await res.text();
     let msg = "메일 발송에 실패했습니다.";
+
+    // 404 에러 시 주소 확인 안내
     if (res.status === 404) {
-      msg = "요청한 API를 찾을 수 없습니다. 백엔드가 실행 중인지, NEXT_PUBLIC_API_URL(예: http://localhost:8080)이 맞는지 확인해주세요.";
+      msg = "API 경로를 찾을 수 없습니다. 백엔드 컨트롤러 매핑을 확인하세요.";
     } else {
       try {
         const json = JSON.parse(text);
-        if (typeof json.message === "string") msg = json.message;
-        else if (typeof json.error === "string") msg = json.error;
+        msg = json.message || json.error || msg;
       } catch {
         if (text) msg = text;
       }
