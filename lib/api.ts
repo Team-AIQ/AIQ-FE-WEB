@@ -75,49 +75,46 @@ export async function apiFetch(
   const isAbsolute = url.startsWith("http");
   const fullUrl = isAbsolute ? url : `${API_BASE}${url.startsWith("/") ? url : `/${url}`}`;
 
-  const doRequest = async (accessToken: string | null, isRetry = false): Promise<Response> => {
-    const headers = new Headers(init.headers);
-    if (accessToken) {
-      headers.set("Authorization", `Bearer ${accessToken}`);
-    }
-    if (!headers.has("Content-Type")) {
-      headers.set("Content-Type", "application/json");
-    }
-
-    const res = await fetch(fullUrl, {
-      ...init,
-      headers,
-    });
-
-    if (res.status === 401 && !isRetry) {
-      if (isRefreshing) {
-        return new Promise<Response>((resolve) => {
-          addRefreshSubscriber((newToken) => {
-            doRequest(newToken, true).then(resolve);
-          });
-        });
-      }
-
-      isRefreshing = true;
-      try {
-        const { accessToken: newToken } = await refreshTokens();
-        onRefreshed(newToken);
-        return doRequest(newToken, true);
-      } catch (e) {
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
+    const doRequest = async (accessToken: string | null, isRetry = false): Promise<Response> => {
+        const headers = new Headers(init.headers);
+        if (accessToken) {
+            headers.set("Authorization", `Bearer ${accessToken}`);
         }
-        throw e;
-      } finally {
-        isRefreshing = false;
-      }
-    }
 
-    return res;
-  };
+        const res = await fetch(fullUrl, { ...init, headers });
 
-  const accessToken = getAccessToken();
-  return doRequest(accessToken);
+        // API 요청 중 401 Unauthorized 에러가 뜬 경우
+        if (res.status === 401 && !isRetry) {
+            // 이미 다른 요청이 토큰을 재발급 중이라면 큐에 추가하고 대기
+            if (isRefreshing) {
+                return new Promise<Response>((resolve) => {
+                    addRefreshSubscriber((newToken) => {
+                        doRequest(newToken, true).then(resolve);
+                    });
+                });
+            }
+
+            isRefreshing = true;
+            try {
+                // 5. 토큰 재발급 실행
+                const { accessToken: newToken } = await refreshTokens();
+                onRefreshed(newToken); // 대기 중이던 다른 요청들에게 새 토큰 전달
+
+                // 6. 실패했던 원래 API 요청을 새 토큰으로 다시 시도 (isRetry = true)
+                return doRequest(newToken, true);
+            } catch (e) {
+                // 재발급 실패 시 catch 블록에서 처리 (refreshTokens 내부에서 이미 리다이렉트 수행)
+                throw e;
+            } finally {
+                isRefreshing = false;
+            }
+        }
+
+        return res;
+    };
+
+    const accessToken = getAccessToken();
+    return doRequest(accessToken);
 }
 
 /**

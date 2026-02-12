@@ -271,128 +271,100 @@ export default function ChatPage() {
     }
   };
   // [SSE] 스트림 처리 함수
-  const startSseStream = (queryId: number) => {
-    // 주의: Next.js 개발 환경(proxy)이나 배포 환경에 따라 URL 조정 필요
-    // apiFetch는 fetch wrapper이므로 여기선 EventSource를 직접 써야 함
-    // 토큰이 필요하다면 url에 쿼리 파라미터로 넣거나(보안 주의), 쿠키 기반이어야 함.
-    // 여기서는 로컬 개발 환경 가정: http://localhost:8080/api/v1/aiq/stream/...
-    // .env 설정에 따라 주소 변경 필요.
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-    const url = `${baseUrl}/api/v1/aiq/stream/${queryId}`;
+    const startSseStream = (queryId: number) => {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+        const url = `${baseUrl}/api/v1/aiq/stream/${queryId}`;
 
-    const token = getAccessToken();
-    if (!token) {
-      console.error("토큰이 없습니다. SSE 연결 불가");
-      return;
-    }
-
-    console.log("SSE 연결 시도:", url);
-
-    // 2. EventSourcePolyfill을 사용하여 헤더에 토큰 추가
-    const EventSourcePolyfill = require("event-source-polyfill").EventSourcePolyfill;
-    const eventSource = new EventSourcePolyfill(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      heartbeatTimeout: 1200000,
-      withCredentials: true,// (선택) 타임아웃 설정
-    });
-
-    // eventSourceRef.current = eventSource; // 타입 에러가 날 수 있으니 아래처럼 캐스팅하거나 any로 처리
-    eventSourceRef.current = eventSource as unknown as EventSource;
-
-    let aiResults: Record<string, AiResponse> = {};
-    let isFinished = false;
-
-    eventSource.onopen = () => {
-      console.log("SSE 연결 성공");
-    };
-
-    // 기본 메시지 수신 (백엔드에서 send(object) 할 때)
-    eventSource.onmessage = (event: MessageEvent) => {
-      try {
-        const parsed = JSON.parse(event.data);
-        console.log("SSE 수신:", parsed);
-
-        // 데이터 타입에 따라 분기 처리 (백엔드가 어떤 키로 구분하는지에 따라 수정 필요)
-        // 예시: { type: 'GPT', data: ... } 또는 데이터 구조 자체로 판별
-
-        // 1. 개별 AI 응답인 경우 (GPT, Gemini, Perplexity)
-        // 백엔드에서 모델명을 구분해 줄 필드가 필요함.
-        // 만약 없다면 순서대로 혹은 구조로 추측해야 함.
-        // 여기서는 임의로 'recommendations' 키가 있으면 AI 응답으로 간주
-        if (parsed.recommendations) {
-          // 어떤 모델인지 알 수 있는 식별자가 필요 (예: parsed.modelName 또는 type)
-          // 식별자가 없다면 UI에 그냥 'AI 분석 결과'로 표시하거나,
-          // 백엔드에 model 필드 추가 요청 필요.
-          // 임시로 '모델명'을 추출하거나 랜덤 할당 (실제론 백엔드 수정 권장)
-          const modelName = parsed.modelName || `Model-${Object.keys(aiResults).length + 1}`;
-          aiResults[modelName] = parsed;
-          console.log(`[${modelName}] 분석 완료`);
-
-          // 진행 상황 업데이트 (옵션)
-          // setMessages(prev => [...prev, {id: generateId(), text: `${modelName} 분석 완료`, isUser: false}]);
+        const token = getAccessToken();
+        if (!token) {
+            console.error("토큰이 없습니다. SSE 연결 불가");
+            return;
         }
 
-        // 2. 최종 리포트인 경우
-        if (parsed.consensus && parsed.topProducts) {
-          const finalReport: FinalReport = parsed;
+        console.log("SSE 연결 시도:", url);
 
-          // SSE 종료
-          console.log("최종 리포트 수신 완료");
-          isFinished = true;
-          eventSource.close();
-          setReportPhase("report");
+        const EventSourcePolyfill = require("event-source-polyfill").EventSourcePolyfill;
+        const eventSource = new EventSourcePolyfill(url, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            heartbeatTimeout: 1200000,
+            withCredentials: true,
+        });
 
-          // 최종 메시지에 리포트 데이터 통째로 저장 -> UI에서 렌더링
-          setMessages(prev => [
-            ...prev,
-            {
-              id: generateId(),
-              text: "분석이 완료되었습니다!", // 텍스트는 UI에서 안 보일 수도 있음 (reportPhase로 대체)
-              isUser: false,
-              reportData: finalReport,
-              aiResponses: aiResults // 모아둔 개별 결과도 같이 저장
+        eventSourceRef.current = eventSource as unknown as EventSource;
+
+        let aiResults: Record<string, AiResponse> = {};
+        let isFinished = false;
+
+        // --- 공통 데이터 처리 로직 ---
+        const processData = (rawData: string) => {
+            try {
+                const parsed = JSON.parse(rawData);
+
+                // 1. 개별 AI 추천 결과인 경우 (GPT_ANSWER, Gemini_ANSWER 등)
+                if (parsed.recommendations) {
+                    const modelName = parsed.modelName || `Model-${Object.keys(aiResults).length + 1}`;
+                    aiResults[modelName] = parsed;
+                    console.log(`[${modelName}] 분석 완료`);
+                }
+
+                // 2. 최종 리포트인 경우 (FINAL_REPORT)
+                if (parsed.consensus && parsed.topProducts) {
+                    console.log("최종 리포트 수신 완료");
+                    setMessages(prev => [
+                        ...prev,
+                        {
+                            id: generateId(),
+                            text: "분석이 완료되었습니다!",
+                            isUser: false,
+                            reportData: parsed,
+                            aiResponses: { ...aiResults } // 현재까지 모인 AI 결과들 포함
+                        }
+                    ]);
+                }
+            } catch (e) {
+                console.error("데이터 파싱 에러", e);
             }
-          ]);
-        }
+        };
 
-      } catch (e) {
-        console.error("JSON 파싱 에러", e);
-      }
+        // --- 이벤트 리스너 등록 ---
+
+        // 백엔드에서 보낸 각 AI 모델의 답변 수신
+        eventSource.addEventListener("GPT_ANSWER", (e: any) => processData(e.data));
+        eventSource.addEventListener("Gemini_ANSWER", (e: any) => processData(e.data));
+        eventSource.addEventListener("Perplexity_ANSWER", (e: any) => processData(e.data));
+
+        // 백엔드에서 보낸 최종 리포트 수신
+        eventSource.addEventListener("FINAL_REPORT", (e: any) => processData(e.data));
+
+        // 백엔드에서 보낸 종료 신호
+        eventSource.addEventListener("finish", () => {
+            console.log("🏁 백엔드로부터 종료 신호를 받았습니다.");
+            isFinished = true;
+            eventSource.close();
+            setReportPhase("report");
+        });
+
+        eventSource.onopen = () => {
+            console.log("SSE 연결 성공");
+        };
+
+        // [중요] 백엔드에서 이벤트 이름을 지정(name)하면 onmessage는 작동하지 않습니다.
+        // 위에서 addEventListener로 모두 처리했으므로 onmessage는 비워두거나 제거해도 됩니다.
+        eventSource.onmessage = (event: MessageEvent) => {
+            console.log("일반 메시지 수신:", event.data);
+        };
+
+        eventSource.onerror = (err: any) => {
+            if (isFinished || eventSource.readyState === 2) {
+                return; // 정상 종료 상태라면 에러 로그를 남기지 않음
+            }
+
+            console.error("🔴 SSE 에러 발생:", err);
+            eventSource.close();
+        };
     };
-
-    eventSource.onerror = (err: any) => {
-
-      if (isFinished) {
-        eventSource.close();
-        return;
-      }
-      // 2. [중요] readyState가 2 (CLOSED)라면, 서버가 연결을 끊은 것이므로 정상 종료로 간주
-      const targetState = err?.target?.readyState;
-      if (eventSource.readyState === 2 || targetState === 2) {
-        console.log("✅ 서버가 연결을 종료했습니다. (정상 종료)");
-        eventSource.close();
-        return;
-      }
-      console.error("🔴 SSE 에러 발생 객체:", err);
-
-      // Polyfill은 에러 객체에 status나 statusText를 담아주는 경우가 많습니다.
-      if (err.status) {
-        console.error(`🔴 HTTP 상태 코드: ${err.status}`);
-      }
-      if (err.statusText) {
-        console.error(`🔴 상태 메시지: ${err.statusText}`);
-      }
-
-      // 만약 토큰 문제라면(401), 로그아웃 처리를 하거나 알림을 줄 수 있습니다.
-      if (err.status === 401) {
-        alert("인증이 만료되었습니다. 다시 로그인해주세요.");
-      }
-
-      eventSource.close();
-    };
-  };
 
   // 컴포넌트 언마운트 시 연결 종료
   useEffect(() => {
