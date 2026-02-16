@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import ServiceIntroModal from "@/components/ServiceIntroModal";
+import TermsModal from "@/components/TermsModal";
+import PrivacyModal from "@/components/PrivacyModal";
+import HelpModal from "@/components/HelpModal";
 import { isAuthenticated, clearTokens } from "@/lib/auth";
 import {useRouter} from "next/navigation";
 
@@ -85,6 +88,9 @@ export default function HomePage() {
   const hasLeftAboutRef = useRef(false);
   const hasLeftAppRef = useRef(false);
   const [isServiceIntroOpen, setIsServiceIntroOpen] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const router = useRouter(); // 3. router 인스턴스 생성
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 4. 로그인 상태 추가
@@ -504,13 +510,37 @@ export default function HomePage() {
               <h4>정책</h4>
               <ul>
                 <li>
-                  <a href="#">이용약관</a>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsTermsOpen(true);
+                    }}
+                  >
+                    이용약관
+                  </a>
                 </li>
                 <li>
-                  <a href="#">개인정보처리방침</a>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsPrivacyOpen(true);
+                    }}
+                  >
+                    개인정보처리방침
+                  </a>
                 </li>
                 <li>
-                  <a href="#">도움말</a>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsHelpOpen(true);
+                    }}
+                  >
+                    도움말
+                  </a>
                 </li>
               </ul>
             </div>
@@ -535,6 +565,18 @@ export default function HomePage() {
       <ServiceIntroModal
         isOpen={isServiceIntroOpen}
         onClose={() => setIsServiceIntroOpen(false)}
+      />
+      <TermsModal
+        isOpen={isTermsOpen}
+        onClose={() => setIsTermsOpen(false)}
+      />
+      <PrivacyModal
+        isOpen={isPrivacyOpen}
+        onClose={() => setIsPrivacyOpen(false)}
+      />
+      <HelpModal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
       />
     </>
   );
