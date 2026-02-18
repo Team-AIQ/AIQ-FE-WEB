@@ -6,8 +6,8 @@ import { useState, useRef, useEffect } from "react";
 import { requestResetCode, verifyResetCode, resetPassword } from "@/lib/api";
 
 const CODE_LENGTH = 6;
-/** 비밀번호: 영문 소문자, 숫자 포함 8~16자 */
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*\d)[a-z\d]{8,16}$/;
+/** 비밀번호: 영문 소문자, 숫자 포함 8~16자 (특수문자 허용) */
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*\d)[a-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]{8,16}$/;
 function isValidPassword(value: string) {
   return PASSWORD_REGEX.test(value);
 }
