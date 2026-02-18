@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { getUserNickname, setOnboardingDone } from "@/lib/auth";
 
 const INTRO_LINES = [
   "AIQ 사용법을 알려줄게",
@@ -74,6 +75,7 @@ function useTypewriter(lines: string[], speed: number, startDelay: number) {
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const [nickname, setNickname] = useState("사용자");
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [progress, setProgress] = useState(0);
   const [visibleMessages, setVisibleMessages] = useState<number>(0);
@@ -89,6 +91,11 @@ export default function OnboardingPage() {
   const [clickedStep4Button, setClickedStep4Button] = useState(false);
   const lastUserMsgRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const name = getUserNickname();
+    if (name) setNickname(name);
+  }, []);
 
   // AI 메시지 하나씩 등장 (step 1)
   useEffect(() => {
@@ -155,7 +162,7 @@ export default function OnboardingPage() {
     setClickedStep4Button(true);
     setUserMessages((prev) => [...prev, CHOICE_BUTTON_STEP4]);
     setProgress(100);
-    // 바로 채팅 화면으로
+    setOnboardingDone();
     setTimeout(() => {
       router.replace("/chat");
     }, 1500);
@@ -206,6 +213,7 @@ export default function OnboardingPage() {
   }, [step, userMessages.length]);
 
   const handleSkip = () => {
+    setOnboardingDone();
     router.replace("/chat");
   };
 
@@ -274,7 +282,7 @@ export default function OnboardingPage() {
                 className="onboarding-user-icon"
                 aria-hidden
               />
-              <span className="onboarding-user-name">멋쟁이 요리사</span>
+              <span className="onboarding-user-name">{nickname}</span>
             </div>
 
             <div className="onboarding-gauge-wrap">

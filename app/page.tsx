@@ -7,7 +7,7 @@ import TermsModal from "@/components/TermsModal";
 import PrivacyModal from "@/components/PrivacyModal";
 import HelpModal from "@/components/HelpModal";
 import { isAuthenticated, clearTokens } from "@/lib/auth";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const TYPEWRITER_TEXT =
   "만나서 반가워! 나는 AIQ 행성에서 온 피클이야\n너의 장바구니 속 고민을 나에게 말해줘";
@@ -17,7 +17,9 @@ const TYPEWRITER_START_DELAY = 700;
 function useTypewriter(fullText: string, startDelay: number) {
   const [displayText, setDisplayText] = useState<React.ReactNode[]>([]);
   const [showCursor, setShowCursor] = useState(true);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   const charIdRef = useRef(0);
 
   const runTypewriter = (startIndex: number) => {
@@ -31,7 +33,10 @@ function useTypewriter(fullText: string, startDelay: number) {
       ...prev,
       char === "\n" ? <br key={charId} /> : char,
     ]);
-    timeoutRef.current = setTimeout(() => runTypewriter(startIndex + 1), TYPEWRITER_SPEED);
+    timeoutRef.current = setTimeout(
+      () => runTypewriter(startIndex + 1),
+      TYPEWRITER_SPEED,
+    );
   };
 
   const restart = () => {
@@ -56,7 +61,7 @@ function useIntersectionObserver(
   ref: React.RefObject<Element | null>,
   threshold: number,
   onIntersecting: () => void,
-  onNotIntersecting?: () => void
+  onNotIntersecting?: () => void,
 ) {
   useEffect(() => {
     const el = ref.current;
@@ -72,7 +77,7 @@ function useIntersectionObserver(
           }
         });
       },
-      { threshold, rootMargin: "0px" }
+      { threshold, rootMargin: "0px" },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -97,7 +102,7 @@ export default function HomePage() {
 
   const { displayText, showCursor, restart } = useTypewriter(
     TYPEWRITER_TEXT,
-    TYPEWRITER_START_DELAY
+    TYPEWRITER_START_DELAY,
   );
   useEffect(() => {
     setIsLoggedIn(isAuthenticated());
@@ -117,13 +122,14 @@ export default function HomePage() {
       router.push("/"); // 홈으로 이동하여 상태 반영
     }
   };
-  const scrollToSection = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const target = document.getElementById(id);
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
+  const scrollToSection =
+    (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    };
 
   const scrollToTop = () => {
     heroRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -140,7 +146,7 @@ export default function HomePage() {
       window.history.replaceState(null, "", window.location.pathname);
     }
     window.scrollTo(0, 0);
-    
+
     const btn = topBtnRef.current;
     const about = aboutRef.current;
     if (!btn || !about) return;
@@ -187,7 +193,7 @@ export default function HomePage() {
     () => {
       hasLeftHeroRef.current = true;
       heroRef.current?.classList.remove("hero-play");
-    }
+    },
   );
 
   useIntersectionObserver(
@@ -197,7 +203,9 @@ export default function HomePage() {
       if (hasLeftAboutRef.current) {
         aboutRef.current?.classList.remove("in-view");
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => aboutRef.current?.classList.add("in-view"));
+          requestAnimationFrame(() =>
+            aboutRef.current?.classList.add("in-view"),
+          );
         });
         hasLeftAboutRef.current = false;
       }
@@ -205,7 +213,7 @@ export default function HomePage() {
     () => {
       hasLeftAboutRef.current = true;
       aboutRef.current?.classList.remove("in-view");
-    }
+    },
   );
 
   useIntersectionObserver(
@@ -223,7 +231,7 @@ export default function HomePage() {
     () => {
       hasLeftAppRef.current = true;
       appRef.current?.classList.remove("in-view");
-    }
+    },
   );
 
   return (
@@ -250,18 +258,23 @@ export default function HomePage() {
             </span>
           </Link>
           {isLoggedIn ? (
-              <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="btn-login"
-                  style={{ cursor: 'pointer', background: 'none', border: '1px solid #fff', color: '#fff' }}
-              >
-                로그아웃
-              </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="btn-login"
+              style={{
+                cursor: "pointer",
+                background: "none",
+                border: "1px solid #fff",
+                color: "#fff",
+              }}
+            >
+              로그아웃
+            </button>
           ) : (
-              <Link href="/login" className="btn-login">
-                로그인
-              </Link>
+            <Link href="/login" className="btn-login">
+              로그인
+            </Link>
           )}
         </header>
 
@@ -288,11 +301,15 @@ export default function HomePage() {
             </div>
           </div>
           <div className="hero-cta">
-            <Link href="/chat" className="btn-start">
+            <Link href={isLoggedIn ? "/chat" : "/login"} className="btn-start">
               <span className="btn-start-text">시작하기</span>
               <span className="btn-start-arrow">&gt;</span>
             </Link>
-            <a href="#about" className="link-learn" onClick={scrollToSection("about")}>
+            <a
+              href="#about"
+              className="link-learn"
+              onClick={scrollToSection("about")}
+            >
               <span className="chevron-down" />
               AIQ 자세히 보기
             </a>
@@ -324,7 +341,9 @@ export default function HomePage() {
               <img
                 src="/image/step1-illust.png"
                 alt=""
-                onError={(e) => e.currentTarget.parentElement?.classList.add("placeholder")}
+                onError={(e) =>
+                  e.currentTarget.parentElement?.classList.add("placeholder")
+                }
               />
             </div>
           </article>
@@ -340,7 +359,9 @@ export default function HomePage() {
               <img
                 src="/image/step2-illust.png"
                 alt=""
-                onError={(e) => e.currentTarget.parentElement?.classList.add("placeholder")}
+                onError={(e) =>
+                  e.currentTarget.parentElement?.classList.add("placeholder")
+                }
               />
             </div>
           </article>
@@ -356,7 +377,9 @@ export default function HomePage() {
               <img
                 src="/image/step3-illust.png"
                 alt=""
-                onError={(e) => e.currentTarget.parentElement?.classList.add("placeholder")}
+                onError={(e) =>
+                  e.currentTarget.parentElement?.classList.add("placeholder")
+                }
               />
             </div>
           </article>
@@ -372,13 +395,19 @@ export default function HomePage() {
               <img
                 src="/image/step4-illust.png"
                 alt=""
-                onError={(e) => e.currentTarget.parentElement?.classList.add("placeholder")}
+                onError={(e) =>
+                  e.currentTarget.parentElement?.classList.add("placeholder")
+                }
               />
             </div>
           </article>
         </div>
 
-        <a href="#app-download" className="link-app-down" onClick={scrollToSection("app-download")}>
+        <a
+          href="#app-download"
+          className="link-app-down"
+          onClick={scrollToSection("app-download")}
+        >
           <span className="chevron-down" />
           APP 다운로드
         </a>
@@ -395,7 +424,9 @@ export default function HomePage() {
               src="/image/app-left.png"
               alt="AIQ 앱 로고·아이콘·화면"
               className="app-left-img"
-              onError={(e) => e.currentTarget.parentElement?.classList.add("placeholder")}
+              onError={(e) =>
+                e.currentTarget.parentElement?.classList.add("placeholder")
+              }
             />
           </div>
           <div className="app-copy">
@@ -407,27 +438,30 @@ export default function HomePage() {
               onError={(e) => (e.currentTarget.style.display = "none")}
             />
             <p className="app-headline">지구의 쇼핑이 너무 복잡하다면?</p>
-            <p className="app-headline app-headline-accent">쇼핑 고민은 이제 AIQ에게 물어보세요</p>
-            <p className="app-slogan">더 이상의 비교는 생략, 확신만 남는 쇼핑</p>
-            <p className="app-desc">지구인을 위한 대화형 AI 쇼핑 어시스턴트, AIQ</p>
+            <p className="app-headline app-headline-accent">
+              쇼핑 고민은 이제 AIQ에게 물어보세요
+            </p>
+            <p className="app-slogan">
+              더 이상의 비교는 생략, 확신만 남는 쇼핑
+            </p>
+            <p className="app-desc">
+              지구인을 위한 대화형 AI 쇼핑 어시스턴트, AIQ
+            </p>
             <div className="app-buttons">
               <a
-                href={process.env.NEXT_PUBLIC_APP_STORE_URL ?? "https://www.apple.com/kr/app-store/"}
+                href={
+                  process.env.NEXT_PUBLIC_APP_STORE_URL ??
+                  "https://www.apple.com/kr/app-store/"
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="app-store-link"
                 aria-label="App Store에서 다운로드"
               >
-                <img src="/image/app-store-btn.png" alt="Download on the App Store" />
-              </a>
-              <a
-                href={process.env.NEXT_PUBLIC_GOOGLE_PLAY_URL ?? "https://play.google.com/store/apps"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="google-play-link"
-                aria-label="Google Play에서 다운로드"
-              >
-                <img src="/image/google-play-btn.png" alt="GET IT ON Google Play" />
+                <img
+                  src="/image/app-store-btn.png"
+                  alt="Download on the App Store"
+                />
               </a>
             </div>
             <img
@@ -446,7 +480,12 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <a href="#footer" className="btn-to-footer" aria-label="푸터로 이동" title="푸터로 이동">
+        <a
+          href="#footer"
+          className="btn-to-footer"
+          aria-label="푸터로 이동"
+          title="푸터로 이동"
+        >
           <span className="chevron-down" aria-hidden="true" />
         </a>
       </section>
@@ -455,22 +494,36 @@ export default function HomePage() {
         <div className="footer-inner">
           <div className="footer-left">
             <Link href="#" className="footer-logo">
-              <img src="/image/footer-logo.png" alt="AIQ" className="footer-logo-img" />
+              <img
+                src="/image/footer-logo.png"
+                alt="AIQ"
+                className="footer-logo-img"
+              />
             </Link>
-            <p className="footer-tagline">쇼핑 의사결정을 돕는 대화형 AI 서비스</p>
+            <p className="footer-tagline">
+              쇼핑 의사결정을 돕는 대화형 AI 서비스
+            </p>
             <div className="footer-contact">
               <p>
                 문의메일 :{" "}
-                <a href="mailto:theaiq.contact@gmail.com">theaiq.contact@gmail.com</a>
-              </p>
-              <p className="contact-note">* 본 메일은 제휴·협업 관련 문의 전용입니다.</p>
-              <p className="contact-note">
-                접수된 제휴/협업 제안은 서비스 방향성과의 적합성을 기준으로 개별 검토됩니다.
+                <a href="mailto:theaiq.contact@gmail.com">
+                  theaiq.contact@gmail.com
+                </a>
               </p>
               <p className="contact-note">
-                담당자가 영업일 기준 (평일 9:00 ~ 18:00) 3일 이내에 회신드립니다.
+                * 본 메일은 제휴·협업 관련 문의 전용입니다.
               </p>
-              <p className="contact-note">AIQ는 가치 있는 파트너십을 기다리고 있습니다.</p>
+              <p className="contact-note">
+                접수된 제휴/협업 제안은 서비스 방향성과의 적합성을 기준으로 개별
+                검토됩니다.
+              </p>
+              <p className="contact-note">
+                담당자가 영업일 기준 (평일 9:00 ~ 18:00) 3일 이내에
+                회신드립니다.
+              </p>
+              <p className="contact-note">
+                AIQ는 가치 있는 파트너십을 기다리고 있습니다.
+              </p>
             </div>
             <p className="copyright">© 2026 AIQ. All Rights Reserved.</p>
           </div>
@@ -494,14 +547,21 @@ export default function HomePage() {
                 </li>
                 <li>
                   {isLoggedIn ? (
-                      <button
-                          onClick={handleLogout}
-                          style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0, font: 'inherit' }}
-                      >
-                        로그아웃
-                      </button>
+                    <button
+                      onClick={handleLogout}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "inherit",
+                        cursor: "pointer",
+                        padding: 0,
+                        font: "inherit",
+                      }}
+                    >
+                      로그아웃
+                    </button>
                   ) : (
-                      <Link href="/login">로그인</Link>
+                    <Link href="/login">로그인</Link>
                   )}
                 </li>
               </ul>
@@ -557,8 +617,19 @@ export default function HomePage() {
         title="맨 위로"
         onClick={scrollToTop}
       >
-        <svg className="btn-top-chevron" viewBox="0 0 12 10" width={12} height={10} aria-hidden="true">
-          <path d="M0 10 L6 0 L12 10" fill="none" stroke="currentColor" strokeWidth={1} />
+        <svg
+          className="btn-top-chevron"
+          viewBox="0 0 12 10"
+          width={12}
+          height={10}
+          aria-hidden="true"
+        >
+          <path
+            d="M0 10 L6 0 L12 10"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1}
+          />
         </svg>
       </button>
 
@@ -566,18 +637,12 @@ export default function HomePage() {
         isOpen={isServiceIntroOpen}
         onClose={() => setIsServiceIntroOpen(false)}
       />
-      <TermsModal
-        isOpen={isTermsOpen}
-        onClose={() => setIsTermsOpen(false)}
-      />
+      <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
       <PrivacyModal
         isOpen={isPrivacyOpen}
         onClose={() => setIsPrivacyOpen(false)}
       />
-      <HelpModal
-        isOpen={isHelpOpen}
-        onClose={() => setIsHelpOpen(false)}
-      />
+      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </>
   );
 }

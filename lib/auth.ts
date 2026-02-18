@@ -53,6 +53,29 @@ export function clearTokens(): void {
 export function isAuthenticated(): boolean {
   return !!getAccessToken();
 }
+
+export function isGuest(): boolean {
+  const token = getAccessToken();
+  if (!token) return false;
+  try {
+    const decoded = jwtDecode<TokenPayload>(token);
+    return decoded.auth === "ROLE_GUEST";
+  } catch {
+    return false;
+  }
+}
+const ONBOARDING_DONE_KEY = "onboarding_done";
+
+export function isOnboardingDone(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(ONBOARDING_DONE_KEY) === "true";
+}
+
+export function setOnboardingDone(): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(ONBOARDING_DONE_KEY, "true");
+}
+
 export function getUserId(): number | null {
   const token = getAccessToken();
   if (!token) return null;

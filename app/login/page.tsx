@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import {apiFetch} from "@/lib/api";
-import {setTokens} from "@/lib/auth";
+import {setTokens, isOnboardingDone} from "@/lib/auth";
+import TermsModal from "@/components/TermsModal";
+import PrivacyModal from "@/components/PrivacyModal";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,6 +32,32 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isRememberMe, setIsRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const handleGuestLogin = async () => {
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+      const res = await fetch(`${API_BASE}/api/auth/guest`, {
+        method: "POST",
+      });
+      if (res.ok) {
+        const resData = await res.json();
+        const tokenData = resData.data || resData;
+        if (tokenData.accessToken && tokenData.refreshToken) {
+          setTokens(tokenData.accessToken, tokenData.refreshToken);
+          window.location.href = isOnboardingDone() ? "/chat" : "/onboarding";
+        } else {
+          alert("비회원 로그인에 실패했습니다.");
+        }
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.message || "비회원 로그인에 실패했습니다.");
+      }
+    } catch {
+      alert("서버와 연결할 수 없습니다.");
+    }
+  };
+
   const handleLogin = async () => {
     // 1. 유효성 검사
     let hasError = false;
@@ -67,8 +95,8 @@ export default function LoginPage() {
 
         if (accessToken && refreshToken) {
           setTokens(accessToken, refreshToken);
-          // 메인 페이지로 이동 (새로고침 효과를 위해 window.location 사용)
-          window.location.href = "/";
+          // 온보딩 페이지로 이동
+          window.location.href = isOnboardingDone() ? "/chat" : "/onboarding";
         } else {
           console.error("토큰 구조가 다릅니다:", resData);
           alert("로그인에 성공했으나 토큰을 찾을 수 없습니다.");
@@ -140,9 +168,30 @@ export default function LoginPage() {
               </div>
 
               <p className="login-agreement">
-                회원가입 없이 이용 가능하며, 첫 로그인 시 <a href="#" className="login-link">이용약관</a>
+                회원가입 없이 이용 가능하며 첫 로그인시{" "}
+                <a
+                  href="#"
+                  className="login-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsTermsOpen(true);
+                  }}
+                >
+                  이용약관
+                </a>
                 <br />
-                및 <a href="#" className="login-link">개인정보처리방침</a> 동의로 간주합니다.
+                및{" "}
+                <a
+                  href="#"
+                  className="login-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsPrivacyOpen(true);
+                  }}
+                >
+                  개인정보처리방침
+                </a>{" "}
+                동의로 간주합니다.
               </p>
 
               <div className="login-email-links">
@@ -151,6 +200,8 @@ export default function LoginPage() {
                 </button>
                 <span className="sep">|</span>
                 <Link href="/signup">이메일로 가입</Link>
+                <span className="sep">|</span>
+                <a href="#" className="login-guest-link" onClick={(e) => { e.preventDefault(); handleGuestLogin(); }}>비회원 체험하기</a>
               </div>
             </>
           ) : (
@@ -233,6 +284,15 @@ export default function LoginPage() {
           )}
         </div>
       </main>
+
+      <TermsModal
+        isOpen={isTermsOpen}
+        onClose={() => setIsTermsOpen(false)}
+      />
+      <PrivacyModal
+        isOpen={isPrivacyOpen}
+        onClose={() => setIsPrivacyOpen(false)}
+      />
     </>
   );
 }

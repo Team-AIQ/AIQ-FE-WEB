@@ -317,6 +317,25 @@ body.onboarding-page {
   flex-direction: column;
   gap: 0;
   padding: 2.75rem 1.25rem 1.25rem 1.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(63, 221, 144, 0.3) transparent;
+}
+
+.onboarding-chat::-webkit-scrollbar {
+  width: 8px;
+}
+
+.onboarding-chat::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.onboarding-chat::-webkit-scrollbar-thumb {
+  background: rgba(63, 221, 144, 0.3);
+  border-radius: 4px;
+}
+
+.onboarding-chat::-webkit-scrollbar-thumb:hover {
+  background: rgba(63, 221, 144, 0.5);
 }
 
 .onboarding-msg {

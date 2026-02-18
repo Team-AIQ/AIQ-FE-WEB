@@ -1,16 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface PrivacyModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onAgree?: () => void;
 }
 
-export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
+export default function PrivacyModal({ isOpen, onClose, onAgree }: PrivacyModalProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [scrolledToBottom, setScrolledToBottom] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      setScrolledToBottom(false);
     } else {
       document.body.style.overflow = "";
     }
@@ -33,6 +38,14 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
       window.removeEventListener("keydown", handleEscape);
     };
   }, [isOpen, onClose]);
+
+  const handleScroll = useCallback(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
+      setScrolledToBottom(true);
+    }
+  }, []);
 
   if (!isOpen) return null;
 
@@ -68,7 +81,7 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
           </svg>
         </button>
 
-        <div className="service-intro-content">
+        <div className="service-intro-content" ref={contentRef} onScroll={handleScroll}>
           <h1 id="privacy-title" className="service-intro-title">
             개인정보처리방침
           </h1>
@@ -202,6 +215,25 @@ export default function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
               있습니다.
             </p>
           </div>
+
+          {onAgree && (
+            <div className="privacy-agree-wrap">
+              <button
+                type="button"
+                className={`privacy-agree-btn${scrolledToBottom ? " privacy-agree-btn--active" : ""}`}
+                disabled={!scrolledToBottom}
+                onClick={() => {
+                  onAgree();
+                  onClose();
+                }}
+              >
+                동의합니다
+              </button>
+              {!scrolledToBottom && (
+                <p className="privacy-agree-hint">끝까지 스크롤하면 동의할 수 있습니다</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </>

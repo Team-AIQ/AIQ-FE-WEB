@@ -217,7 +217,7 @@ export async function requestMagicLinkEmail(email: string): Promise<void> {
 
 /** 회원가입 이메일 인증용 매직 링크 (메일에서 링크 클릭 시 회원가입 페이지로 리다이렉트) */
 export async function requestSignupVerifyEmail(email: string): Promise<void> {
-  return requestMagicLink(email, "signup");
+  return requestMagicLink(email, "web");
 }
 
 /**

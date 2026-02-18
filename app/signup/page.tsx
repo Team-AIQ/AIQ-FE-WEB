@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { requestSignupVerifyEmail, signUp } from "@/lib/api";
+import PrivacyModal from "@/components/PrivacyModal";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function SignupPage() {
   const [emailVerified, setEmailVerified] = useState(false);
   const [sendingMail, setSendingMail] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
   // 메일에서 인증 링크 클릭 후 리다이렉트: ?verified=1&email=xxx
   useEffect(() => {
@@ -284,15 +286,34 @@ export default function SignupPage() {
               {confirmPasswordError && <p className="login-input-error-msg" role="alert">{confirmPasswordError}</p>}
             </div>
 
-            <label className="signup-terms-wrap">
+            <label className="signup-terms-wrap" onClick={(e) => {
+              if (!agreeTerms) {
+                e.preventDefault();
+                setIsPrivacyOpen(true);
+              }
+            }}>
               <input
                 type="checkbox"
                 className="login-check"
                 checked={agreeTerms}
-                onChange={(e) => setAgreeTerms(e.target.checked)}
+                onChange={(e) => {
+                  if (agreeTerms) {
+                    setAgreeTerms(false);
+                  }
+                }}
               />
               <span className="signup-terms-text">개인정보 이용 동의</span>
-              <a href="#" className="signup-terms-link">보기</a>
+              <a
+                href="#"
+                className="signup-terms-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsPrivacyOpen(true);
+                }}
+              >
+                보기
+              </a>
             </label>
 
             <button
@@ -306,6 +327,12 @@ export default function SignupPage() {
           </div>
         </div>
       </main>
+
+      <PrivacyModal
+        isOpen={isPrivacyOpen}
+        onClose={() => setIsPrivacyOpen(false)}
+        onAgree={() => setAgreeTerms(true)}
+      />
     </>
   );
 }
