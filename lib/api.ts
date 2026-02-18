@@ -215,6 +215,81 @@ export async function requestMagicLinkEmail(email: string): Promise<void> {
   return requestMagicLink(email);
 }
 
+/**
+ * 비밀번호 재설정 코드 요청 (POST /api/auth/password/code-request)
+ */
+export async function requestResetCode(email: string): Promise<void> {
+  const url = `${API_BASE}/api/auth/password/code-request?email=${encodeURIComponent(email)}`;
+  let res: Response;
+  try {
+    res = await fetch(url, { method: "POST" });
+  } catch {
+    throw new Error("서버에 연결할 수 없습니다.");
+  }
+  if (!res.ok) {
+    const text = await res.text();
+    let msg = "인증 코드 발송에 실패했습니다.";
+    try {
+      const json = JSON.parse(text);
+      msg = json.message || json.error || msg;
+    } catch {
+      if (text) msg = text;
+    }
+    throw new Error(msg);
+  }
+}
+
+/**
+ * 비밀번호 재설정 코드 검증 (POST /api/auth/password/verify)
+ * @returns resetToken
+ */
+export async function verifyResetCode(email: string, code: string): Promise<string> {
+  const url = `${API_BASE}/api/auth/password/verify?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`;
+  let res: Response;
+  try {
+    res = await fetch(url, { method: "POST" });
+  } catch {
+    throw new Error("서버에 연결할 수 없습니다.");
+  }
+  if (!res.ok) {
+    const text = await res.text();
+    let msg = "코드 검증에 실패했습니다.";
+    try {
+      const json = JSON.parse(text);
+      msg = json.message || json.error || msg;
+    } catch {
+      if (text) msg = text;
+    }
+    throw new Error(msg);
+  }
+  const json = await res.json();
+  return json.data; // resetToken
+}
+
+/**
+ * 비밀번호 재설정 (PATCH /api/auth/password/reset)
+ */
+export async function resetPassword(resetToken: string, newPassword: string): Promise<void> {
+  const url = `${API_BASE}/api/auth/password/reset?resetToken=${encodeURIComponent(resetToken)}&newPassword=${encodeURIComponent(newPassword)}`;
+  let res: Response;
+  try {
+    res = await fetch(url, { method: "PATCH" });
+  } catch {
+    throw new Error("서버에 연결할 수 없습니다.");
+  }
+  if (!res.ok) {
+    const text = await res.text();
+    let msg = "비밀번호 변경에 실패했습니다.";
+    try {
+      const json = JSON.parse(text);
+      msg = json.message || json.error || msg;
+    } catch {
+      if (text) msg = text;
+    }
+    throw new Error(msg);
+  }
+}
+
 /** 회원가입 이메일 인증용 매직 링크 (메일에서 링크 클릭 시 회원가입 페이지로 리다이렉트) */
 export async function requestSignupVerifyEmail(email: string): Promise<void> {
   return requestMagicLink(email, "web");

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { requestMagicLinkEmail } from "@/lib/api";
+import { requestResetCode, verifyResetCode, resetPassword } from "@/lib/api";
 
 const CODE_LENGTH = 6;
 /** 비밀번호: 영문 소문자, 숫자 포함 8~16자 */
@@ -76,6 +76,7 @@ export default function ForgotPasswordPage() {
   const [passwordError, setPasswordError] = useState("");
   const [confirmError, setConfirmError] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [resetToken, setResetToken] = useState("");
 
   // 타이머 (코드 유효 시간)
   useEffect(() => {
@@ -111,18 +112,12 @@ export default function ForgotPasswordPage() {
     }
     setLoading(true);
     try {
-      await requestMagicLinkEmail(email.trim());
+      await requestResetCode(email.trim());
       setStep(2);
       setTimer(TIMER_START);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "메일 발송에 실패했습니다.";
-      // 메일 발송 미설정 시에도 다음 단계(인증코드 화면)로 진행 (테스트용)
-      if (msg.includes("메일 발송 설정이 없습니다")) {
-        setStep(2);
-        setTimer(TIMER_START);
-      } else {
-        setError(msg);
-      }
+      const msg = err instanceof Error ? err.message : "인증 코드 발송에 실패했습니다.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -147,19 +142,32 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (resendCooldown > 0) return;
-    // TODO: 백엔드 재전송 API
-    setResendMessage("코드가 재전송 되었습니다");
-    setResendCooldown(RESEND_COOLDOWN);
-    setTimer(TIMER_START);
+    try {
+      await requestResetCode(email.trim());
+      setResendMessage("코드가 재전송 되었습니다");
+      setResendCooldown(RESEND_COOLDOWN);
+      setTimer(TIMER_START);
+      setCode(Array(CODE_LENGTH).fill(""));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "재전송에 실패했습니다.";
+      setResendMessage(msg);
+    }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     const fullCode = code.join("");
     if (fullCode.length !== CODE_LENGTH) return;
-    // TODO: 백엔드 코드 검증 API 호출 가능. 일단 step 3으로 이동
-    setStep(3);
+    setError("");
+    try {
+      const token = await verifyResetCode(email.trim(), fullCode);
+      setResetToken(token);
+      setStep(3);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "코드 검증에 실패했습니다.";
+      setError(msg);
+    }
   };
 
   const isCodeFilled = code.every((c) => c !== "");
@@ -187,11 +195,11 @@ export default function ForgotPasswordPage() {
     }
     setSubmitLoading(true);
     try {
-      // TODO: 백엔드 비밀번호 재설정 API (token 또는 email + newPassword)
-      await new Promise((r) => setTimeout(r, 300));
+      await resetPassword(resetToken, newPassword);
       router.replace("/login?view=email");
-    } catch {
-      setConfirmError("비밀번호 변경에 실패했습니다.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "비밀번호 변경에 실패했습니다.";
+      setConfirmError(msg);
     } finally {
       setSubmitLoading(false);
     }
