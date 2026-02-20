@@ -20,9 +20,17 @@ body.onboarding-page {
   background-color: var(--color-black);
   background-image:
     radial-gradient(2px 2px at 20px 30px, #fff, transparent),
-    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(
+      2px 2px at 40px 70px,
+      rgba(255, 255, 255, 0.8),
+      transparent
+    ),
     radial-gradient(2px 2px at 50px 160px, #fff, transparent),
-    radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(
+      2px 2px at 90px 40px,
+      rgba(255, 255, 255, 0.6),
+      transparent
+    ),
     radial-gradient(2px 2px at 130px 80px, #fff, transparent);
   background-size: 200px 200px;
   background-position: 0 1.5rem;
@@ -87,7 +95,8 @@ body.onboarding-page {
   height: 100vh;
   height: 100dvh;
   max-height: 100%;
-  padding: max(4rem, env(safe-area-inset-top)) 0 max(2rem, env(safe-area-inset-bottom)) 0;
+  padding: max(4rem, env(safe-area-inset-top)) 0
+    max(2rem, env(safe-area-inset-bottom)) 0;
   gap: 0;
   overflow: hidden;
 }
@@ -129,7 +138,11 @@ body.onboarding-page {
 }
 
 .onboarding-intro {
-  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Pretendard",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 1rem;
   line-height: 1.7;
   color: var(--color-white);
@@ -144,7 +157,9 @@ body.onboarding-page {
 }
 
 @keyframes blink {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
 
 .onboarding-skip-btn {
@@ -192,7 +207,10 @@ body.onboarding-page {
   display: flex;
   flex-direction: column;
   background: transparent;
-  padding: 1.25rem max(2rem, env(safe-area-inset-right)) 1.25rem 1.5rem;
+
+  /* 🔥 오른쪽 여백 늘림 */
+  padding: 1.25rem 4rem 1.25rem 2rem;
+
   overflow: visible;
 }
 
@@ -233,7 +251,11 @@ body.onboarding-page {
 }
 
 .onboarding-user-name {
-  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Pretendard",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 0.75rem;
   color: var(--color-white);
 }
@@ -243,24 +265,16 @@ body.onboarding-page {
 /* 게이지 이미지: 절대 위치로 흐름과 분리, 채팅창 크기 유지하면서 이미지만 조정 */
 /* 0% 진입 화면 이미지 기준(326×56) - 0/25/50/75/100% 동일 크기·위치 */
 .onboarding-gauge-wrap {
-  position: absolute;
-  top: 5.5rem;
-  left: 0;
-  margin-left: -0.85rem;
-  margin-top: 0;
-  margin-bottom: 0;
-  width: 326px;
-  height: 56px;
-  z-index: 2;
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center; /* 채팅 기준 중앙 정렬 */
+  margin-bottom: 0.75rem;
 }
 
-/* 모든 게이지 동일 박스(326×56)에 맞춤 - 비율 다른 이미지도 같은 크기로 표시 */
 .onboarding-gauge-img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: left center;
+  width: min(90%, 326px); /* 반응형 + 최대 326px */
+  height: auto;
 }
 
 /* 채팅창: 높이 제한으로 내부만 스크롤(페이지 스크롤 아님) */
@@ -301,8 +315,12 @@ body.onboarding-page {
 }
 
 @keyframes onboarding-chat-bg-scroll {
-  0% { background-position: center 0; }
-  100% { background-position: center 100%; }
+  0% {
+    background-position: center 0;
+  }
+  100% {
+    background-position: center 100%;
+  }
 }
 
 /* 채팅 내부 스크롤 영역: 위쪽 내용이 위로 올라가며 새 메시지는 아래에 쌓임 */
@@ -360,7 +378,8 @@ body.onboarding-page {
   padding-left: calc(44px + 0.75rem);
 }
 
-.onboarding-msg--ai:not(.onboarding-msg--ai-continuation) .onboarding-msg-avatar {
+.onboarding-msg--ai:not(.onboarding-msg--ai-continuation)
+  .onboarding-msg-avatar {
   position: absolute;
   left: 0;
   top: -8px;
@@ -442,12 +461,16 @@ body.onboarding-page {
   width: fit-content;
   max-width: 85%;
   padding: 0.45rem 0.75rem;
-  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Pretendard",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
   font-size: 0.78rem;
   line-height: 1.45;
   color: var(--color-black);
   font-weight: bold;
-  background: #45D38E;
+  background: #45d38e;
   border: none;
   border-radius: 22.4px 0 22.4px 22.4px;
   box-shadow:
@@ -458,65 +481,49 @@ body.onboarding-page {
   align-self: flex-start;
 }
 
+/* STEP 버튼 영역 (프레임 바깥 하단) */
 .onboarding-choices {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: auto;
+  gap: 16px;
+  margin-top: 24px;
+  width: 100%;
 }
 
-.onboarding-choice-btn--long {
-  flex: 1 1 100%;
-  min-width: 100%;
-}
-
-/* 1번 이미지: 하단 버튼 기본(클릭 전) – 밝은 민트 채움 + 더 진한 민트 테두리 */
-/* 기본: 왼쪽처럼 빛나는 초록색 배경 + 검정 글씨 + 강한 초록 글로우 */
-.onboarding-choice-btn {
+/* STEP1 두 버튼 반반 */
+.onboarding-choices .onboarding-choice-btn {
   flex: 1;
-  min-width: 0;
-  padding: 0.75rem 1.25rem;
-  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.88rem;
-  color: var(--color-black);
-  background: rgba(63, 221, 144, 0.7);
-  border: 1px solid rgba(63, 221, 144, 0.8);
+}
+
+/* ================= 온보딩 전용 CTA 버튼 (기획서 스타일) ================= */
+
+.onboarding-choice-btn {
+  width: 100%;
+  padding: 1rem 1.5rem;
   border-radius: 999px;
+  border: none;
+  background: #f2f2f2;
+  color: #000;
+  font-family: "Pretendard", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s;
-  box-shadow: 
-    0 0 12px rgba(63, 221, 144, 0.7),
-    0 0 24px rgba(63, 221, 144, 0.5),
-    0 0 40px rgba(63, 221, 144, 0.35);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.2s ease;
+  box-shadow: 0 6px 24px rgba(63, 221, 144, 0.18);
 }
 
-/* 마우스 오버 시: 흰색 배경 + 검정 텍스트 */
+/* hover 시 살짝 떠오르는 느낌만 */
 .onboarding-choice-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 1);
-  color: var(--color-black);
-  border-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 
-    0 0 12px rgba(63, 221, 144, 0.4),
-    0 0 24px rgba(63, 221, 144, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(63, 221, 144, 0.25);
 }
 
-/* 클릭 후: 흰색 배경 + 검정 글씨 + 초록 그림자 */
-.onboarding-choice-btn--clicked,
+/* disabled 상태는 그냥 흐리게 */
 .onboarding-choice-btn:disabled {
-  background: rgba(255, 255, 255, 1);
-  color: var(--color-black);
-  box-shadow: 0 0 12px rgba(63, 221, 144, 0.25), 0 0 24px rgba(63, 221, 144, 0.15);
+  opacity: 0.6;
   cursor: default;
-}
-
-/* 채팅 4개 다 나오기 전: 비활성(흐리게) + 클릭 불가 */
-.onboarding-choice-btn--waiting:disabled {
-  background: rgba(63, 221, 144, 0.35);
-  color: var(--color-black);
-  border-color: rgba(63, 221, 144, 0.5);
-  box-shadow: 0 0 8px rgba(63, 221, 144, 0.25);
-  cursor: not-allowed;
-  opacity: 0.85;
 }
 
 @media (max-width: 900px) {
@@ -558,9 +565,17 @@ body.onboarding-page {
   background: #000000;
   background-image:
     radial-gradient(2px 2px at 20px 30px, #fff, transparent),
-    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(
+      2px 2px at 40px 70px,
+      rgba(255, 255, 255, 0.8),
+      transparent
+    ),
     radial-gradient(2px 2px at 50px 160px, #fff, transparent),
-    radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(
+      2px 2px at 90px 40px,
+      rgba(255, 255, 255, 0.6),
+      transparent
+    ),
     radial-gradient(2px 2px at 130px 80px, #fff, transparent);
   background-size: 200px 200px;
   animation: login-twinkle 8s ease-in-out infinite;
@@ -573,10 +588,22 @@ body.onboarding-page {
   left: -200px;
   width: 140px;
   height: 100px;
-  background: linear-gradient(135deg, #3FDD90 0%, #29C99A 50%, #1FB88A 100%);
+  background: linear-gradient(135deg, #3fdd90 0%, #29c99a 50%, #1fb88a 100%);
   clip-path: polygon(
-    10% 20%, 25% 5%, 40% 0%, 60% 0%, 75% 5%, 90% 20%,
-    95% 40%, 90% 60%, 75% 75%, 60% 80%, 40% 80%, 25% 75%, 10% 60%, 5% 40%
+    10% 20%,
+    25% 5%,
+    40% 0%,
+    60% 0%,
+    75% 5%,
+    90% 20%,
+    95% 40%,
+    90% 60%,
+    75% 75%,
+    60% 80%,
+    40% 80%,
+    25% 75%,
+    10% 60%,
+    5% 40%
   );
   box-shadow:
     0 0 40px rgba(63, 221, 144, 1),
@@ -717,4 +744,52 @@ body.onboarding-page {
     clip-path: inset(0 50% 0 50%);
     opacity: 0;
   }
+}
+
+/* =========================
+   STEP 1: 채팅 프레임 안쪽 버튼
+   - 배경(onboarding-chat-bg) 위로 올라오게 z-index 필수
+   - 기획서처럼 좌: 민트 / 우: 화이트
+========================= */
+
+/* STEP 1 전용 세로 정렬 */
+/* STEP 1 버튼 컨테이너 */
+.onboarding-choices--introInChat {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: row; /* ✅ 가로 정렬 */
+  gap: 16px;
+
+  width: 100%;
+  padding: 0 24px 22px;
+}
+
+/* 버튼 공통 */
+.onboarding-choice-btn--intro {
+  flex: 1; /* ✅ 반반 나눔 */
+  padding: 16px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* 좌측(민트) */
+.onboarding-choice-btn--primary {
+  background: rgba(63, 221, 144, 0.85);
+  border: 1px solid rgba(63, 221, 144, 0.9);
+  color: #0b0b0b;
+  box-shadow:
+    0 0 10px rgba(63, 221, 144, 0.55),
+    0 0 22px rgba(63, 221, 144, 0.35);
+}
+
+/* 우측(화이트) */
+.onboarding-choice-btn--secondary {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(63, 221, 144, 0.8);
+  color: #0b0b0b;
+  box-shadow:
+    0 0 10px rgba(63, 221, 144, 0.35),
+    0 0 18px rgba(63, 221, 144, 0.22);
 }

@@ -34,47 +34,35 @@ export default function ProfilePage() {
     setSaveMsg("");
     setPasswordError("");
 
-    // 비밀번호가 입력된 경우에만 검증
-    if (password || passwordConfirm) {
-      if (!passwordRegex.test(password)) {
-        setPasswordError("영문, 숫자, 특수문자 포함 8~16자");
-        return;
-      }
-      if (password !== passwordConfirm) {
-        setPasswordError("비밀번호가 일치하지 않습니다");
-        return;
-      }
+    if (!password && !passwordConfirm) {
+      setPasswordError("변경할 비밀번호를 입력해주세요");
+      return;
+    }
+    if (!passwordRegex.test(password)) {
+      setPasswordError("영문, 숫자, 특수문자 포함 8~16자");
+      return;
+    }
+    if (password !== passwordConfirm) {
+      setPasswordError("비밀번호가 일치하지 않습니다");
+      return;
     }
 
     setIsSaving(true);
     try {
-      // 닉네임 변경
-      const nicknameRes = await apiFetch("/api/user/nickname", {
+      const pwRes = await apiFetch("/api/auth/password/change", {
         method: "PATCH",
-        body: JSON.stringify({ nickname }),
+        body: JSON.stringify({ newPassword: password }),
       });
-      if (!nicknameRes.ok) {
-        const err = await nicknameRes.json().catch(() => ({}));
-        throw new Error(err.message || "닉네임 변경에 실패했습니다.");
+      if (!pwRes.ok) {
+        const err = await pwRes.json().catch(() => ({}));
+        throw new Error(err.message || "비밀번호 변경에 실패했습니다.");
       }
 
-      // 비밀번호 변경 (입력한 경우에만)
-      if (password) {
-        const pwRes = await apiFetch("/api/auth/password/change", {
-          method: "PATCH",
-          body: JSON.stringify({ newPassword: password }),
-        });
-        if (!pwRes.ok) {
-          const err = await pwRes.json().catch(() => ({}));
-          throw new Error(err.message || "비밀번호 변경에 실패했습니다.");
-        }
-      }
-
-      setSaveMsg("저장되었습니다.");
+      setSaveMsg("비밀번호가 변경되었습니다.");
       setPassword("");
       setPasswordConfirm("");
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : "저장에 실패했습니다.";
+      const msg = error instanceof Error ? error.message : "서버 내부 오류가 발생했습니다.";
       setSaveMsg(msg);
     } finally {
       setIsSaving(false);
@@ -136,15 +124,14 @@ export default function ProfilePage() {
             />
           </div>
 
-          {/* 닉네임 */}
+          {/* 닉네임 (읽기 전용) */}
           <div className="profile-field">
             <label className="profile-label">닉네임</label>
             <input
               type="text"
-              className="profile-input"
-              placeholder="닉네임을 입력해주세요"
+              className="profile-input profile-input--readonly"
               value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
+              readOnly
             />
           </div>
 
