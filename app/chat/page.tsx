@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { getUserNickname , getUserId, getAccessToken, isGuest, clearTokens} from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 import HelpModal from "@/components/HelpModal";
@@ -25,6 +23,7 @@ interface AiResponse {
 interface TopProduct {
   rank: number;
   productName: string;
+  price?: string;
   productImage: string;
   specs: Record<string, string>;
   lowestPriceLink: string;
@@ -60,19 +59,63 @@ interface HistoryItem {
 }
 
 interface Message {
-  id: number; // 중복 방지를 위해 난수 포함 권장 (아래 generateId 사용)
+  id: number;
   text: string;
   isUser: boolean;
-  variant?: "default" | "sectorQuestion";
+  variant?: "default" | "sectorQuestion" | "report";
   progressLabel?: string;
-  options?: string[]; // 옵션 버튼이 필요할 경우를 위해 유지
+  options?: string[];
 
-  reportData?: FinalReport; // 리포트 데이터
+  reportData?: FinalReport;
   aiResponses?: Record<string, AiResponse>;
 }
 
+// 텍스트에 줄바꿈·불릿을 JSX로 변환
+function renderFormattedText(text: string) {
+  if (!text) return null;
+  return text.split("\n").map((line, i) => {
+    const trimmed = line.trim();
+    if (!trimmed) return <br key={i} />;
+    // "- " 또는 "• " 로 시작하면 불릿
+    if (/^[-•]\s/.test(trimmed)) {
+      return <div key={i} style={{ paddingLeft: "1em", textIndent: "-0.7em" }}>{trimmed}</div>;
+    }
+    return <div key={i}>{trimmed}</div>;
+  });
+}
+
+const AI_ICONS: Record<string, JSX.Element> = {
+  gpt: (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#10a37f" />
+      <path d="M16 7c-1.8 0-3.4.6-4.7 1.7-.9.8-1.6 1.8-2 2.9-.5-.1-1-.2-1.5-.2C5.7 11.4 4 13.1 4 15.2c0 1.1.5 2.1 1.2 2.8-.1.4-.2.8-.2 1.2 0 2.1 1.7 3.8 3.8 3.8.5 0 1-.1 1.5-.3.4 1.2 1.1 2.2 2 3C13.6 26.4 14.8 27 16 27s2.4-.6 3.7-1.3c.9-.8 1.6-1.8 2-3 .5.2 1 .3 1.5.3 2.1 0 3.8-1.7 3.8-3.8 0-.4-.1-.8-.2-1.2.7-.7 1.2-1.7 1.2-2.8 0-2.1-1.7-3.8-3.8-3.8-.5 0-1 .1-1.5.2-.4-1.1-1.1-2.1-2-2.9C19.4 7.6 17.8 7 16 7z" fill="#fff" opacity="0.9"/>
+      <circle cx="16" cy="16" r="3" fill="#10a37f"/>
+    </svg>
+  ),
+  gemini: (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#4285f4" />
+      <path d="M16 5l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6z" fill="#fff"/>
+      <path d="M23 18l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z" fill="#fff" opacity="0.6"/>
+    </svg>
+  ),
+  perplexity: (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#6366f1" />
+      <path d="M10 8h5v6h-5zM17 8h5v6h-5zM10 18h5v6h-5zM17 18h5v6h-5z" stroke="#fff" strokeWidth="1.5" fill="none" rx="1"/>
+      <line x1="16" y1="8" x2="16" y2="24" stroke="#fff" strokeWidth="1.5"/>
+      <line x1="10" y1="16" x2="22" y2="16" stroke="#fff" strokeWidth="1.5"/>
+    </svg>
+  ),
+};
+
+const AI_MODELS = [
+  { key: "gpt", label: "Chat GPT" },
+  { key: "gemini", label: "Gemini" },
+  { key: "perplexity", label: "Perplexity" },
+];
+
 export default function ChatPage() {
-  const router = useRouter();
   const [inputValue, setInputValue] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -80,6 +123,9 @@ export default function ChatPage() {
 
   // 리포트 상태 관리
   const [reportPhase, setReportPhase] = useState<"idle" | "generating" | "report">("idle");
+
+  // 리포트 패널: 선택된 AI 키 (전체보기)
+  const [selectedAiKey, setSelectedAiKey] = useState<string | null>(null);
 
   // 데이터 관리 상태
   const [curationData, setCurationData] = useState<CurationResponse | null>(null);
@@ -113,6 +159,20 @@ export default function ChatPage() {
   useEffect(() => {
     aiTogglesRef.current = aiToggles;
   }, [aiToggles]);
+
+  const resetToInitial = () => {
+    setReportPhase("idle");
+    setCurationData(null);
+    setMessages([]);
+    setShowWelcome(true);
+    setInputValue("");
+    setSelectedAiKey(null);
+    setActiveHistoryId(null);
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+  };
 
   useEffect(() => {
     const nickname = getUserNickname();
@@ -151,12 +211,31 @@ export default function ChatPage() {
       const json = await res.json();
       const report: FinalReport = json.data;
 
-      // sessionStorage에 저장 후 /report로 이동
-      sessionStorage.setItem("finalReport", JSON.stringify(report));
-      if (json.data.aiResponses) {
-        sessionStorage.setItem("aiResponses", JSON.stringify(json.data.aiResponses));
+      // 히스토리: 사용자 질문 + 통합 보고서만 표시 (AI 개별 답변 없음)
+      const historyItem = historyList.find(h => h.queryId === queryId);
+      const msgs: Message[] = [];
+
+      if (historyItem) {
+        msgs.push({
+          id: Date.now() + Math.random(),
+          text: historyItem.question,
+          isUser: true,
+        });
       }
-      router.push(`/report?queryId=${queryId}`);
+
+      msgs.push({
+        id: Date.now() + Math.random() + 1,
+        text: "",
+        isUser: false,
+        variant: "report",
+        reportData: report,
+        // 히스토리에서는 aiResponses를 넘기지 않아 AI 카드가 표시되지 않음
+      });
+
+      setShowWelcome(false);
+      setReportPhase("report");
+      setSelectedAiKey(null);
+      setMessages(msgs);
     } catch (e) {
       console.error("보고서 조회 실패:", e);
       setMessages(prev => [...prev, {
@@ -184,9 +263,8 @@ export default function ChatPage() {
   const handleSend = async () => {
     const trimmed = inputValue.trim();
     if (!trimmed) return;
-    if (reportPhase !== "idle") return; // 리포트 생성 중/완료 시 입력 차단
+    if (reportPhase !== "idle") return;
 
-    // 1. 사용자 메시지 화면에 추가
     const userMessage: Message = {
       id: generateId(),
       text: trimmed,
@@ -197,21 +275,14 @@ export default function ChatPage() {
     setInputValue("");
     setShowWelcome(false);
 
-    // 2. 큐레이션 데이터가 없으면 -> '시작(Start)' 단계
     if (!curationData) {
       await startCuration(trimmed);
-    }
-    // 3. 데이터가 있으면 -> '답변(Answer)' 단계
-    else {
+    } else {
       await proceedCuration(trimmed);
     }
   };
 
   const startCuration = async (content: string) => {
-    // 로딩 메시지 표시 (선택 사항)
-    // const loadingId = generateId();
-    // setMessages(prev => [...prev, { id: loadingId, text: "분석 중...", isUser: false }]);
-
     try {
       const currentUserId = getUserId();
       if (!currentUserId) {
@@ -225,17 +296,16 @@ export default function ChatPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: currentUserId, // DTO: Long userId
-          question: content      // DTO: String question
+          userId: currentUserId,
+          question: content
         }),
       });
 
       if (response.ok) {
         const res = await response.json();
         const data: CurationResponse = res.data;
-        setCurationData(data); // 데이터 저장
+        setCurationData(data);
 
-        // 0.2초 뒤 안내 메시지
         setTimeout(() => {
           setMessages((prev) => [
             ...prev,
@@ -247,7 +317,6 @@ export default function ChatPage() {
           ]);
         }, 200);
 
-        // 첫 번째 질문 찾아서 표시
         const firstQIdx = data.questions.findIndex(q => q.user_answer === null);
         if (firstQIdx !== -1) {
           showQuestion(data.questions[firstQIdx], firstQIdx, data.questions.length);
@@ -261,55 +330,44 @@ export default function ChatPage() {
     }
   };
 
-  // [Logic] 답변 처리 및 다음 단계 진행
   const proceedCuration = async (answerText: string) => {
     if (!curationData) return;
 
-    // 현재 답변해야 할 질문 찾기
     const currentQIdx = curationData.questions.findIndex(q => q.user_answer === null);
-    if (currentQIdx === -1) return; // 이미 완료됨
+    if (currentQIdx === -1) return;
 
-    // 로컬 데이터 업데이트
     const updatedQuestions = [...curationData.questions];
     updatedQuestions[currentQIdx].user_answer = answerText;
 
     const updatedData = { ...curationData, questions: updatedQuestions };
     setCurationData(updatedData);
 
-    // 다음 질문 확인
     const nextQIdx = updatedQuestions.findIndex(q => q.user_answer === null);
 
     if (nextQIdx !== -1) {
-      // 다음 질문이 남았으면 표시
       showQuestion(updatedQuestions[nextQIdx], nextQIdx, updatedQuestions.length);
     } else {
-      // 모든 질문 완료 -> 제출
       await submitAnswers(updatedData);
     }
   };
 
-  // [UI Helper] 질문 메시지 생성
   const showQuestion = (question: Question, index: number, total: number) => {
-    // 자연스러운 대화를 위한 딜레이 (안내 메시지 후 0.4초 뒤 등)
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
         {
           id: generateId(),
-          text: question.question_text, // 예: "주로 어디에서 작업해?"
+          text: question.question_text,
           isUser: false,
           variant: "sectorQuestion",
-          progressLabel: `${index + 1}/${total}`, // 예: "1/4"
-          options: question.options, // 필요 시 버튼 렌더링에 사용 가능
+          progressLabel: `${index + 1}/${total}`,
+          options: question.options,
         },
       ]);
     }, 600);
   };
 
-  // [API] 최종 제출 및 리포트 생성
-  // [API] 최종 제출 및 SSE 스트림 연결
   const submitAnswers = async (data: CurationResponse) => {
-    // 1. 리포트 생성 중 메시지 표시
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
@@ -323,7 +381,6 @@ export default function ChatPage() {
     }, 200);
 
     try {
-      // 2. 답변 제출
       const payload = {
         queryId: data.queryId,
         answers: data.questions.map(q => ({
@@ -341,8 +398,6 @@ export default function ChatPage() {
         throw new Error("답변 제출 실패");
       }
 
-      // 3. [핵심] 답변 제출 성공 후 SSE 스트림 연결 시작!
-      // 여기서 백엔드의 @GetMapping("/stream/{queryId}") API를 호출하게 됩니다.
       startSseStream(data.queryId);
 
     } catch (error) {
@@ -351,111 +406,109 @@ export default function ChatPage() {
       setMessages(prev => [...prev, { id: generateId(), text: "오류가 발생했습니다.", isUser: false }]);
     }
   };
-  // [SSE] 스트림 처리 함수
-    const startSseStream = (queryId: number) => {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-        const url = `${baseUrl}/api/v1/aiq/stream/${queryId}`;
 
-        const token = getAccessToken();
-        if (!token) {
-            console.error("토큰이 없습니다. SSE 연결 불가");
-            return;
+  // [SSE] 스트림 처리 함수
+  const startSseStream = (queryId: number) => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+    // AI 토글 상태에 따라 models 파라미터 생성
+    const toggles = aiTogglesRef.current;
+    const modelList: string[] = [];
+    if (toggles.chatgpt) modelList.push("GPT");
+    if (toggles.gemini) modelList.push("Gemini");
+    if (toggles.perplexity) modelList.push("Perplexity");
+
+    const modelsParam = modelList.length > 0 ? `?models=${modelList.join(",")}` : "";
+    const url = `${baseUrl}/api/v1/aiq/stream/${queryId}${modelsParam}`;
+
+    const token = getAccessToken();
+    if (!token) {
+      console.error("토큰이 없습니다. SSE 연결 불가");
+      return;
+    }
+
+    console.log("SSE 연결 시도:", url);
+
+    const EventSourcePolyfill = require("event-source-polyfill").EventSourcePolyfill;
+    const eventSource = new EventSourcePolyfill(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      heartbeatTimeout: 1200000,
+      withCredentials: true,
+    });
+
+    eventSourceRef.current = eventSource as unknown as EventSource;
+
+    let aiResults: Record<string, AiResponse> = {};
+    let isFinished = false;
+
+    const processData = (rawData: string) => {
+      try {
+        const parsed = JSON.parse(rawData);
+
+        // 1. 개별 AI 추천 결과
+        if (parsed.recommendations) {
+          const modelName = parsed.modelName || `Model-${Object.keys(aiResults).length + 1}`;
+          aiResults[modelName] = parsed;
+          console.log(`[${modelName}] 분석 완료`);
         }
 
-        console.log("SSE 연결 시도:", url);
+        // 2. 최종 리포트 → 인라인으로 채팅에 표시
+        if (parsed.consensus && parsed.topProducts) {
+          console.log("최종 리포트 수신 완료");
 
-        const EventSourcePolyfill = require("event-source-polyfill").EventSourcePolyfill;
-        const eventSource = new EventSourcePolyfill(url, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-            heartbeatTimeout: 1200000,
-            withCredentials: true,
-        });
+          setMessages(prev => [...prev, {
+            id: generateId(),
+            text: "",
+            isUser: false,
+            variant: "report",
+            reportData: parsed as FinalReport,
+            aiResponses: { ...aiResults },
+          }]);
 
-        eventSourceRef.current = eventSource as unknown as EventSource;
-
-        let aiResults: Record<string, AiResponse> = {};
-        let isFinished = false;
-
-        // --- 공통 데이터 처리 로직 ---
-        const processData = (rawData: string) => {
-            try {
-                const parsed = JSON.parse(rawData);
-
-                // 1. 개별 AI 추천 결과인 경우 (GPT_ANSWER, Gemini_ANSWER 등)
-                if (parsed.recommendations) {
-                    const modelName = parsed.modelName || `Model-${Object.keys(aiResults).length + 1}`;
-                    aiResults[modelName] = parsed;
-                    console.log(`[${modelName}] 분석 완료`);
-                }
-
-                // 2. 최종 리포트인 경우 (FINAL_REPORT)
-                if (parsed.consensus && parsed.topProducts) {
-                  console.log("최종 리포트 수신 완료");
-
-                  // 사용자 선택 요약
-                  const requirements = curationData?.questions
-                    .map(q => q.user_answer)
-                    .filter(Boolean)
-                    .join(", ") || "사용자 선택 옵션";
-
-                  // 세션에 데이터 저장
-                  sessionStorage.setItem("finalReport", JSON.stringify(parsed));
-                  sessionStorage.setItem("aiResponses", JSON.stringify(aiResults));
-                  sessionStorage.setItem("userRequirements", requirements);
-
-                  // report 페이지로 이동
-                  router.push(`/report?queryId=${queryId}`);
-                }
-            } catch (e) {
-                console.error("데이터 파싱 에러", e);
-            }
-        };
-
-        // --- 이벤트 리스너 등록 ---
-
-        // 백엔드에서 보낸 각 AI 모델의 답변 수신 (토글이 꺼진 모델은 무시)
-        eventSource.addEventListener("GPT_ANSWER", (e: any) => {
-            if (aiTogglesRef.current.chatgpt) processData(e.data);
-        });
-        eventSource.addEventListener("Gemini_ANSWER", (e: any) => {
-            if (aiTogglesRef.current.gemini) processData(e.data);
-        });
-        eventSource.addEventListener("Perplexity_ANSWER", (e: any) => {
-            if (aiTogglesRef.current.perplexity) processData(e.data);
-        });
-
-        // 백엔드에서 보낸 최종 리포트 수신
-        eventSource.addEventListener("FINAL_REPORT", (e: any) => processData(e.data));
-
-        // 백엔드에서 보낸 종료 신호
-        eventSource.addEventListener("finish", () => {
-            console.log("🏁 백엔드로부터 종료 신호를 받았습니다.");
-            isFinished = true;
-            eventSource.close();
-            setReportPhase("report");
-        });
-
-        eventSource.onopen = () => {
-            console.log("SSE 연결 성공");
-        };
-
-        // [중요] 백엔드에서 이벤트 이름을 지정(name)하면 onmessage는 작동하지 않습니다.
-        // 위에서 addEventListener로 모두 처리했으므로 onmessage는 비워두거나 제거해도 됩니다.
-        eventSource.onmessage = (event: MessageEvent) => {
-            console.log("일반 메시지 수신:", event.data);
-        };
-
-        eventSource.onerror = (err: any) => {
-            if (isFinished || eventSource.readyState === 2) {
-                return; // 정상 종료 상태라면 에러 로그를 남기지 않음
-            }
-
-            console.error("🔴 SSE 에러 발생:", err);
-            eventSource.close();
-        };
+          setReportPhase("report");
+        }
+      } catch (e) {
+        console.error("데이터 파싱 에러", e);
+      }
     };
+
+    // --- 이벤트 리스너 등록 (models 파라미터로 이미 백엔드에서 필터링됨) ---
+    eventSource.addEventListener("GPT_ANSWER", (e: any) => {
+      processData(e.data);
+    });
+    eventSource.addEventListener("Gemini_ANSWER", (e: any) => {
+      processData(e.data);
+    });
+    eventSource.addEventListener("Perplexity_ANSWER", (e: any) => {
+      processData(e.data);
+    });
+
+    eventSource.addEventListener("FINAL_REPORT", (e: any) => processData(e.data));
+
+    eventSource.addEventListener("finish", () => {
+      console.log("백엔드로부터 종료 신호를 받았습니다.");
+      isFinished = true;
+      eventSource.close();
+    });
+
+    eventSource.onopen = () => {
+      console.log("SSE 연결 성공");
+    };
+
+    eventSource.onmessage = (event: MessageEvent) => {
+      console.log("일반 메시지 수신:", event.data);
+    };
+
+    eventSource.onerror = (err: any) => {
+      if (isFinished || eventSource.readyState === 2) {
+        return;
+      }
+      console.error("SSE 에러 발생:", err);
+      eventSource.close();
+    };
+  };
 
   // 컴포넌트 언마운트 시 연결 종료
   useEffect(() => {
@@ -472,9 +525,215 @@ export default function ChatPage() {
     }
   };
 
-  // 현재 세션의 사용자 질문만 추출 (첫 번째 사용자 메시지 = 제품 질문)
+  // AI 전체보기 헬퍼
+  const findAiData = (aiResponses: Record<string, AiResponse>, key: string) => {
+    const entry = Object.entries(aiResponses).find(([k]) =>
+      k.toLowerCase().includes(key),
+    );
+    return entry ? { modelName: entry[0], aiData: entry[1] } : null;
+  };
+
+
+  // 현재 세션의 사용자 질문만 추출
   const userQueries = messages.filter(m => m.isUser);
   const firstQuery = userQueries.length > 0 ? userQueries[0] : null;
+
+  // ===== 인라인 리포트 렌더링 =====
+  const renderReport = (msg: Message) => {
+    const report = msg.reportData;
+    const aiResp = msg.aiResponses || {};
+    if (!report) return null;
+
+    const hasAiResponses = Object.keys(aiResp).length > 0;
+
+    // 현재 선택된 AI의 상세 데이터
+    const panelAi = hasAiResponses && selectedAiKey ? findAiData(aiResp, selectedAiKey) : null;
+    const panelLabel = selectedAiKey
+      ? AI_MODELS.find(m => m.key === selectedAiKey)?.label || ""
+      : "";
+
+    return (
+      <div className="chat-report-inline">
+        {/* ===== 왼쪽: 리포트 본문 ===== */}
+        <div className="rpt-left-col">
+          {/* 공통 합의 + 분석 + 제품 + 종합의견 = 하나의 박스 */}
+          <div className="rpt-consensus-box">
+            <h3 className="rpt-consensus-title">AI 공통 합의</h3>
+            <div className="rpt-consensus-text">{renderFormattedText(report.consensus)}</div>
+
+            {report.decisionBranches && (
+              <>
+                <h4 className="rpt-consensus-sub">AI 간 판단 분기</h4>
+                <div className="rpt-consensus-text">{renderFormattedText(report.decisionBranches)}</div>
+              </>
+            )}
+
+            {/* 추천 제품 TOP */}
+            {report.topProducts && report.topProducts.length > 0 && (
+              <>
+                <h4 className="rpt-consensus-sub">
+                  최종 추천 | 추천 제품 TOP {report.topProducts.length}
+                </h4>
+                {report.topProducts.map((product, idx) => (
+                  <div key={idx} className="rpt-product-card">
+                    <div className="rpt-product-rank">{product.rank || idx + 1}위</div>
+                    <div className="rpt-product-main">
+                      {product.productImage && (
+                        <div className="rpt-product-img-wrap">
+                          <img
+                            src={product.productImage}
+                            alt={product.productName}
+                            className="rpt-product-img"
+                            onError={(e) => { e.currentTarget.style.display = "none"; }}
+                          />
+                        </div>
+                      )}
+                      <div className="rpt-product-info">
+                        <div className="rpt-product-name">{product.productName}</div>
+                        {product.price && (
+                          <div className="rpt-product-price">{product.price}</div>
+                        )}
+                        {product.specs && Object.keys(product.specs).length > 0 && (
+                          <div className="rpt-product-specs">
+                            {Object.entries(product.specs).map(([key, val]) => (
+                              <span key={key} className="rpt-product-spec">{key}: {val}</span>
+                            ))}
+                          </div>
+                        )}
+                        <p className="rpt-product-analysis">{renderFormattedText(product.comparativeAnalysis)}</p>
+                        {product.lowestPriceLink && (
+                          <a
+                            href={product.lowestPriceLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rpt-product-link"
+                          >
+                            최저가 보러가기 →
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {/* AIQ 추천 이유 / 종합 의견 */}
+            {report.finalWord && (
+              <>
+                <h4 className="rpt-consensus-sub">AIQ 추천 이유</h4>
+                <div className="rpt-consensus-text">{renderFormattedText(report.finalWord)}</div>
+              </>
+            )}
+          </div>
+
+          {/* AI 카드 3개 — 히스토리에서는 숨김 (aiResponses가 없으면) */}
+          {hasAiResponses && (
+            <div className="rpt-ai-row">
+              {AI_MODELS.map(({ key, label }) => {
+                const found = findAiData(aiResp, key);
+                return (
+                  <div key={key} className={`rpt-ai-card-new ${!found ? "is-off" : ""}`}>
+                    <div className="rpt-ai-card-head">
+                      <span className="rpt-ai-icon">{AI_ICONS[key]}</span>
+                      <span className="rpt-ai-label">{label}</span>
+                    </div>
+
+                    {found ? (
+                      <div className="rpt-ai-card-body-new">
+                        {found.aiData.recommendations?.slice(0, 1).map((rec, i) => (
+                          <div key={i} className="rpt-ai-card-item-new">
+                            <strong>1. {rec.modelName || rec.targetAudience}</strong>
+                            <ul className="rpt-ai-card-reasons">
+                              {rec.selectionReasons?.map((r, ri) => (
+                                <li key={ri}>{r}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rpt-ai-card-empty">
+                        <div className="rpt-ai-off">OFF</div>
+                        <p className="rpt-ai-off-text">
+                          활성화를 원하시면<br />{label} ON을 켜주세요
+                        </p>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      className="rpt-ai-card-btn-new"
+                      onClick={() => setSelectedAiKey(selectedAiKey === key ? null : key)}
+                      disabled={!found}
+                    >
+                      {selectedAiKey === key ? "접기" : "전체보기"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* 완료하기 버튼 */}
+          <button
+            type="button"
+            className="chat-report-complete-btn"
+            onClick={resetToInitial}
+          >
+            완료하기
+          </button>
+        </div>
+
+        {/* ===== 오른쪽: AI 전체보기 패널 (인라인) ===== */}
+        {panelAi && (
+          <div className="rpt-panel-inline">
+            <div className="rpt-panel-head">
+              <h3 className="rpt-panel-name">
+                {selectedAiKey && AI_ICONS[selectedAiKey]}{" "}
+                {panelLabel}
+              </h3>
+              <button
+                type="button"
+                className="rpt-panel-back"
+                onClick={() => setSelectedAiKey(null)}
+              >
+                뒤로가기
+              </button>
+            </div>
+            <div className="rpt-panel-scroll">
+              {panelAi.aiData.recommendations?.map((rec, recIdx) => (
+                <div key={recIdx} className="rpt-panel-rec">
+                  <h4 className="rpt-panel-rec-t">
+                    {recIdx + 1}. {rec.modelName || rec.targetAudience}
+                  </h4>
+                  <ul className="rpt-panel-rec-ul">
+                    {rec.selectionReasons?.map((reason, rIdx) => (
+                      <li key={rIdx}>{reason}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+
+              {panelAi.aiData.specGuide && (
+                <div className="rpt-panel-sec">
+                  <h4 className="rpt-panel-sec-t">구매 스펙 가이드</h4>
+                  <div className="rpt-panel-sec-body">{renderFormattedText(panelAi.aiData.specGuide)}</div>
+                </div>
+              )}
+
+              {panelAi.aiData.finalWord && (
+                <div className="rpt-panel-sec">
+                  <h4 className="rpt-panel-sec-t">종합 의견</h4>
+                  <div className="rpt-panel-sec-body">{renderFormattedText(panelAi.aiData.finalWord)}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
       <>
@@ -496,7 +755,6 @@ export default function ChatPage() {
             aria-hidden={!menuOpen}
         >
           <div className="chat-sidebar-inner">
-            {/* 상단: 도움말 + 닫기 */}
             <div className="chat-sidebar-header">
               <button
                   type="button"
@@ -524,7 +782,6 @@ export default function ChatPage() {
               </button>
             </div>
 
-            {/* 크레딧 영역 */}
             <div className="chat-sidebar-credit">
               <span className="chat-sidebar-credit-badge">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -542,7 +799,6 @@ export default function ChatPage() {
               </button>
             </div>
 
-            {/* 채팅 기록 */}
             <div className="chat-sidebar-history">
               <h3 className="chat-sidebar-history-title">채팅</h3>
 
@@ -575,7 +831,6 @@ export default function ChatPage() {
               )}
             </div>
 
-            {/* AI 토글 */}
             <div className="chat-sidebar-ai-toggles">
               {(["chatgpt", "gemini", "perplexity"] as const).map((key) => (
                   <label key={key} className="chat-sidebar-ai-toggle">
@@ -596,12 +851,11 @@ export default function ChatPage() {
           </div>
         </aside>
 
-        {/* 도움말 모달 */}
         <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
 
         <div className="chat-page-layout">
           <header className="chat-header">
-            {!isGuestUser && (
+            {!isGuestUser ? (
               <button
                   type="button"
                   className="chat-menu-btn"
@@ -611,8 +865,17 @@ export default function ChatPage() {
               >
                 <img src="/image/chat-menu-icon.png" alt="" className="chat-menu-icon-img" aria-hidden />
               </button>
+            ) : (
+              <div style={{ width: "2.5rem", flexShrink: 0 }} />
             )}
-            <Link href="/" className="chat-logo">
+            <a
+              href="/chat"
+              className="chat-logo"
+              onClick={(e) => {
+                e.preventDefault();
+                resetToInitial();
+              }}
+            >
               <img
                   src="/image/chat-logo.png"
                   alt="AIQ"
@@ -623,17 +886,17 @@ export default function ChatPage() {
             <span className="logo-icon">A</span>
             <span className="logo-text">AIQ</span>
           </span>
-            </Link>
+            </a>
             <div className="chat-user-box-wrap">
               <button
                   type="button"
                   className="chat-user-box onboarding-user-box"
-                  onClick={() => setShowUserMenu(prev => !prev)}
+                  onClick={() => isGuestUser ? setShowUserMenu(prev => !prev) : (window.location.href = "/profile")}
               >
                 <img src="/image/user-icon.png" alt="" className="onboarding-user-icon" aria-hidden />
                 <span className="onboarding-user-name">{userNickname}</span>
               </button>
-              {showUserMenu && (
+              {isGuestUser && showUserMenu && (
                   <div className="chat-user-dropdown">
                     <button
                         type="button"
@@ -675,8 +938,17 @@ export default function ChatPage() {
             )}
 
             {messages.length > 0 && (
-                <div className="chat-messages" ref={chatMessagesRef}>
+                <div className={`chat-messages${reportPhase === "report" ? " chat-messages--report" : ""}`} ref={chatMessagesRef}>
                   {messages.map((msg, index) => {
+                    // 리포트 메시지는 별도 렌더링
+                    if (msg.variant === "report") {
+                      return (
+                        <div key={msg.id} className="chat-message chat-message--ai chat-message--report">
+                          {renderReport(msg)}
+                        </div>
+                      );
+                    }
+
                     const isFirstInBlock =
                         index === 0 || messages[index - 1].isUser !== msg.isUser;
                     return (
@@ -723,7 +995,6 @@ export default function ChatPage() {
                                       msg.text
                                   )}
                                 </div>
-                                {/* 옵션 버튼: 말풍선 바깥 아래에 표시 */}
                                 {msg.variant === "sectorQuestion" && msg.options && msg.options.length > 0 && (
                                     <div className="chat-option-buttons">
                                       {msg.options.map((option, optIdx) => (
@@ -766,8 +1037,6 @@ export default function ChatPage() {
                         </div>
                       </div>
                   )}
-
-                  {/* 리포트는 /report 페이지로 이동하여 표시 */}
                 </div>
             )}
 

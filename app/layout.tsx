@@ -4,6 +4,7 @@ import "../styles.css";
 import "../login.css";
 import "../onboarding.css";
 import "../chat.css";
+import "../profile.css";
 
 export const metadata: Metadata = {
   title: "AIQ - 쇼핑 의사결정을 돕는 대화형 AI 서비스",

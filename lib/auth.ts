@@ -76,6 +76,17 @@ export function setOnboardingDone(): void {
   localStorage.setItem(ONBOARDING_DONE_KEY, "true");
 }
 
+export function getUserEmail(): string | null {
+  const token = getAccessToken();
+  if (!token) return null;
+  try {
+    const decoded = jwtDecode<TokenPayload>(token);
+    return decoded.sub || null;
+  } catch {
+    return null;
+  }
+}
+
 export function getUserId(): number | null {
   const token = getAccessToken();
   if (!token) return null;

@@ -162,7 +162,7 @@ export default function LoginPage() {
                 <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/oauth2/authorization/google?origin=web`} className="login-social-btn" id="btn-google" aria-label="Google로 로그인">
                   <img src="/image/login-btn-google.png" alt="Google로 계속하기" />
                 </a>
-                <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/oauth2/authorization/Naver?origin=web`} className="login-social-btn" id="btn-naver" aria-label="네이버로 로그인">
+                <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/oauth2/authorization/naver?origin=web`} className="login-social-btn" id="btn-naver" aria-label="네이버로 로그인">
                   <img src="/image/login-btn-naver.png" alt="네이버로 계속하기" />
                 </a>
               </div>

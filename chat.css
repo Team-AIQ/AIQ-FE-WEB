@@ -994,27 +994,36 @@ body.chat-page {
   border: 1px solid rgba(63, 221, 144, 0.4);
   border-radius: 14px;
   background: rgba(0, 16, 11, 0.75);
-  padding: 18px 18px;
+  padding: 24px;
   overflow: auto;
 }
 
 .rpt-consensus-title {
-  margin: 0 0 10px;
-  font-size: 0.9rem;
+  margin: 0 0 14px;
+  font-size: 1rem;
   font-weight: 800;
   color: rgba(63, 221, 144, 0.95);
 }
 
 .rpt-consensus-sub {
-  margin: 16px 0 8px;
-  font-size: 0.85rem;
+  margin: 20px 0 10px;
+  font-size: 0.95rem;
   font-weight: 800;
   color: rgba(63, 221, 144, 0.95);
 }
 
+.rpt-consensus-sub::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: rgba(63, 221, 144, 0.15);
+  margin-bottom: 20px;
+}
+
 .rpt-consensus-text {
-  font-size: 0.8rem;
-  line-height: 1.7;
+  font-size: 0.85rem;
+  line-height: 1.8;
   color: #e8e8e8;
   word-break: keep-all;
 }
@@ -1029,55 +1038,77 @@ body.chat-page {
 /* 카드 공통 */
 .rpt-ai-card-new {
   border: 1px solid rgba(63, 221, 144, 0.35);
-  border-radius: 16px;
-  background: rgba(0, 0, 0, 0.75);
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.85);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 220px;
 }
 
 .rpt-ai-card-head {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 14px 10px;
+  gap: 12px;
+  padding: 20px 20px 14px;
   color: rgba(63, 221, 144, 0.95);
   font-weight: 800;
+  font-size: 1.05rem;
 }
 
 .rpt-ai-icon {
-  font-size: 1rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rpt-ai-icon svg {
+  width: 32px;
+  height: 32px;
+  display: block;
+  border-radius: 8px;
 }
 
 .rpt-ai-card-body-new {
-  padding: 0 14px 14px;
+  padding: 0 20px 16px;
   color: #ddd;
-  font-size: 0.72rem;
-  line-height: 1.6;
+  font-size: 0.85rem;
+  line-height: 1.7;
   flex: 1;
+  overflow: hidden;
 }
 
 .rpt-ai-card-item-new strong {
   display: block;
-  margin: 10px 0 4px;
+  margin: 0 0 8px;
   color: #fff;
-  font-size: 0.75rem;
-}
-.rpt-ai-card-item-new p {
-  margin: 0;
-  color: #cfcfcf;
-  font-size: 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
-/* OFF 카드 (4번 이미지) */
+.rpt-ai-card-reasons {
+  margin: 0;
+  padding-left: 1.2em;
+  list-style: disc;
+  font-size: 0.82rem;
+  line-height: 1.8;
+  color: #d8d8d8;
+}
+
+.rpt-ai-card-reasons li {
+  margin-bottom: 2px;
+}
+
+/* OFF 카드 */
 .rpt-ai-card-new.is-off {
   background: rgba(0, 0, 0, 0.9);
 }
 
 .rpt-ai-card-empty {
   flex: 1;
-  padding: 0 14px 14px;
+  padding: 0 20px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1089,42 +1120,324 @@ body.chat-page {
 
 .rpt-ai-off {
   font-weight: 900;
+  font-size: 1rem;
   opacity: 0.85;
 }
 
 .rpt-ai-off-text {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   line-height: 1.4;
   opacity: 0.9;
 }
 
-/* 하단 버튼 */
+/* 하단 전체보기 버튼 — 기획서 스타일 */
 .rpt-ai-card-btn-new {
-  margin: 0 14px 14px;
-  height: 42px;
+  margin: auto 0 0;
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 0 0 20px 20px;
+  background: linear-gradient(180deg, rgba(63, 221, 144, 0.7) 0%, rgba(63, 221, 144, 0.95) 100%);
+  color: #0b0b0b;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.rpt-ai-card-btn-new:hover {
+  opacity: 0.9;
+}
+
+.rpt-ai-card-btn-new:disabled {
+  background: rgba(63, 221, 144, 0.2);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+
+/* ========== 추천 제품 카드 ========== */
+.rpt-products {
+  margin-top: 8px;
+}
+
+.rpt-product-card {
+  border: 1px solid rgba(63, 221, 144, 0.2);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 18px;
+  margin-bottom: 12px;
+}
+
+.rpt-product-card:last-child {
+  margin-bottom: 0;
+}
+
+.rpt-product-rank {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: rgba(63, 221, 144, 0.95);
+  margin-bottom: 10px;
+}
+
+.rpt-product-main {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.rpt-product-img-wrap {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.rpt-product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rpt-product-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.rpt-product-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.rpt-product-price {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: rgba(63, 221, 144, 0.95);
+  margin-bottom: 8px;
+}
+
+.rpt-product-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-bottom: 8px;
+}
+
+.rpt-product-spec {
+  font-size: 0.75rem;
+  color: #bbb;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.rpt-product-analysis {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: #d0d0d0;
+  margin: 0 0 10px;
+}
+
+.rpt-product-link {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(63, 221, 144, 0.95);
+  text-decoration: none;
+  border: 1px solid rgba(63, 221, 144, 0.5);
+  border-radius: 6px;
+  padding: 6px 14px;
+  transition: background 0.2s;
+}
+
+.rpt-product-link:hover {
+  background: rgba(63, 221, 144, 0.15);
+}
+
+/* ========== 오른쪽 패널 ========== */
+.rpt-panel {
+  border: 1px solid rgba(63, 221, 144, 0.4);
+  border-radius: 14px;
+  background: rgba(0, 16, 11, 0.75);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.rpt-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(63, 221, 144, 0.2);
+}
+
+.rpt-panel-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: rgba(63, 221, 144, 0.95);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rpt-panel-name svg {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.rpt-panel-back {
+  background: none;
+  border: 1px solid rgba(63, 221, 144, 0.4);
+  border-radius: 6px;
+  color: rgba(63, 221, 144, 0.9);
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.rpt-panel-back:hover {
+  background: rgba(63, 221, 144, 0.15);
+}
+
+.rpt-panel-scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 16px 18px;
+}
+
+.rpt-panel-rec {
+  margin-bottom: 16px;
+}
+
+.rpt-panel-rec-t {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.rpt-panel-rec-ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: #d0d0d0;
+}
+
+.rpt-panel-sec {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(63, 221, 144, 0.15);
+}
+
+.rpt-panel-sec-t {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(63, 221, 144, 0.95);
+}
+
+.rpt-panel-sec p,
+.rpt-panel-sec-body {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: #d0d0d0;
+}
+
+/* ========== 리포트 모드: chat-messages 확장 ========== */
+.chat-messages--report {
+  max-width: 1100px;
+}
+
+/* 리포트 메시지는 전체 너비 사용 */
+.chat-message--report {
+  max-width: 100% !important;
+  width: 100%;
+}
+
+/* ========== 인라인 리포트 (채팅 안에 표시) ========== */
+/* 항상 2분할: 왼쪽 리포트, 오른쪽 비어있다가 패널 열리면 채워짐 */
+.chat-report-inline {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.rpt-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* ===== 인라인 AI 패널 (오른쪽 컬럼) ===== */
+.rpt-panel-inline {
+  background: rgba(0, 8, 5, 0.85);
+  border: 1px solid rgba(63, 221, 144, 0.3);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadeInPanel 0.25s ease-out;
+}
+
+.rpt-panel-inline .rpt-panel-head {
+  border-radius: 14px 14px 0 0;
+}
+
+.rpt-panel-inline .rpt-panel-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+@keyframes fadeInPanel {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* 완료하기 버튼 */
+.chat-report-complete-btn {
+  width: 100%;
+  height: 48px;
   border: none;
   border-radius: 999px;
   background: rgba(63, 221, 144, 0.9);
   color: #0b0b0b;
+  font-size: 0.9rem;
   font-weight: 800;
   cursor: pointer;
+  transition: background 0.2s;
+  font-family: "Pretendard Variable", sans-serif;
 }
 
-.rpt-ai-card-btn-new:disabled {
-  background: rgba(63, 221, 144, 0.25);
-  color: rgba(255, 255, 255, 0.6);
-  cursor: not-allowed;
+.chat-report-complete-btn:hover {
+  background: rgba(63, 221, 144, 1);
 }
 
-/* 오른쪽 패널은 너 기존 rpt-panel 스타일 그대로 써도 됨 */
-
-/* 반응형 */
+/* ========== 반응형 ========== */
 @media (max-width: 1024px) {
-  .rpt-grid.is-open {
+  .chat-messages--report {
+    max-width: 100%;
+  }
+  .chat-report-inline {
     grid-template-columns: 1fr;
   }
   .rpt-ai-row {
     grid-template-columns: 1fr;
+  }
+  .rpt-product-img-wrap {
+    width: 80px;
+    height: 80px;
   }
 }

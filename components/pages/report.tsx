@@ -20,6 +20,7 @@ interface AiResponse {
 interface TopProduct {
   rank: number;
   productName: string;
+  price?: string;
   productImage: string;
   specs: Record<string, string>;
   lowestPriceLink: string;
@@ -71,7 +72,8 @@ export default function ReportPage() {
     sessionStorage.removeItem("finalReport");
     sessionStorage.removeItem("aiResponses");
     sessionStorage.removeItem("userRequirements");
-    router.push("/chat");
+    // 강제로 새로고침하여 /chat 초기 상태로 진입
+    window.location.href = "/chat";
   };
 
   const findAiData = (key: string) => {
@@ -102,22 +104,16 @@ export default function ReportPage() {
 
   if (!report) return null;
 
-  const topProduct = report.topProducts?.[0];
-
   return (
     <ChatLayout>
       <ChatHeader />
-      {/* chat-main 구조 그대로 사용 */}
       <div className="chat-main">
-        {/* ✅ report 전용 컨테이너 (chat-messages 클래스 제거) */}
         <div className="rpt-container">
-          {/* ✅ 초록 테두리/배경 “껍데기” */}
           <div className="rpt-shell">
-            {/* ✅ 2컬럼 그리드: 왼쪽(공통합의+카드) / 오른쪽(상세패널) */}
             <div className={`rpt-grid ${selectedAi ? "is-open" : ""}`}>
               {/* ===== 왼쪽 컬럼 ===== */}
               <div className="rpt-leftcol">
-                {/* 위: 공통 합의 박스 */}
+                {/* 공통 합의 박스 */}
                 <div className="rpt-consensus-box">
                   <h3 className="rpt-consensus-title">AI 공통 합의</h3>
                   <div className="rpt-consensus-text">{report.consensus}</div>
@@ -130,9 +126,69 @@ export default function ReportPage() {
                       </div>
                     </>
                   )}
+
+                  {/* 추천 제품 TOP 3 */}
+                  {report.topProducts && report.topProducts.length > 0 && (
+                    <div className="rpt-products">
+                      <h4 className="rpt-consensus-sub">추천 제품 TOP {report.topProducts.length}</h4>
+                      {report.topProducts.map((product, idx) => (
+                        <div key={idx} className="rpt-product-card">
+                          <div className="rpt-product-rank">{product.rank || idx + 1}위</div>
+                          <div className="rpt-product-main">
+                            {product.productImage && (
+                              <div className="rpt-product-img-wrap">
+                                <img
+                                  src={product.productImage}
+                                  alt={product.productName}
+                                  className="rpt-product-img"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                />
+                              </div>
+                            )}
+                            <div className="rpt-product-info">
+                              <div className="rpt-product-name">{product.productName}</div>
+                              {product.price && (
+                                <div className="rpt-product-price">{product.price}</div>
+                              )}
+                              {product.specs && Object.keys(product.specs).length > 0 && (
+                                <div className="rpt-product-specs">
+                                  {Object.entries(product.specs).map(([key, val]) => (
+                                    <span key={key} className="rpt-product-spec">
+                                      {key}: {val}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              <p className="rpt-product-analysis">{product.comparativeAnalysis}</p>
+                              {product.lowestPriceLink && (
+                                <a
+                                  href={product.lowestPriceLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="rpt-product-link"
+                                >
+                                  최저가 보러가기 →
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* 종합 의견 */}
+                  {report.finalWord && (
+                    <>
+                      <h4 className="rpt-consensus-sub">종합 의견</h4>
+                      <div className="rpt-consensus-text">{report.finalWord}</div>
+                    </>
+                  )}
                 </div>
 
-                {/* 아래: AI 카드 3개 */}
+                {/* AI 카드 3개 */}
                 <div className="rpt-ai-row">
                   {AI_MODELS.map(({ key, label, icon }) => {
                     const found = findAiData(key);
@@ -165,7 +221,6 @@ export default function ReportPage() {
                               ))}
                           </div>
                         ) : (
-                          // ✅ 4번 사진 같은 “OFF 카드”
                           <div className="rpt-ai-card-empty">
                             <div className="rpt-ai-off">OFF</div>
                             <p className="rpt-ai-off-text">
@@ -194,13 +249,13 @@ export default function ReportPage() {
               {selectedAi && (
                 <div className="rpt-panel">
                   <div className="rpt-panel-head">
-                    <h3 className="rpt-panel-name">🤖 {selectedAiLabel}</h3>
+                    <h3 className="rpt-panel-name">{selectedAiLabel}</h3>
                     <button
                       type="button"
                       className="rpt-panel-back"
                       onClick={() => setSelectedAiKey(null)}
                     >
-                      ← 뒤로가기
+                      ← 닫기
                     </button>
                   </div>
 
@@ -208,7 +263,7 @@ export default function ReportPage() {
                     {selectedAi.aiData.recommendations?.map((rec, recIdx) => (
                       <div key={recIdx} className="rpt-panel-rec">
                         <h4 className="rpt-panel-rec-t">
-                          {recIdx + 1}. {rec.targetAudience}
+                          {recIdx + 1}. {rec.modelName || rec.targetAudience}
                         </h4>
                         <ul className="rpt-panel-rec-ul">
                           {rec.selectionReasons?.map((reason, rIdx) => (
@@ -220,14 +275,14 @@ export default function ReportPage() {
 
                     {selectedAi.aiData.specGuide && (
                       <div className="rpt-panel-sec">
-                        <h4 className="rpt-panel-sec-t">🔥 구매 스펙 가이드</h4>
+                        <h4 className="rpt-panel-sec-t">구매 스펙 가이드</h4>
                         <p>{selectedAi.aiData.specGuide}</p>
                       </div>
                     )}
 
                     {selectedAi.aiData.finalWord && (
                       <div className="rpt-panel-sec">
-                        <h4 className="rpt-panel-sec-t">💬 종합 의견</h4>
+                        <h4 className="rpt-panel-sec-t">종합 의견</h4>
                         <p>{selectedAi.aiData.finalWord}</p>
                       </div>
                     )}
@@ -238,7 +293,7 @@ export default function ReportPage() {
           </div>
         </div>
 
-        {/* ✅ 하단 바는 rpt-container 밖(지금처럼 chat-main의 마지막)에 유지 */}
+        {/* 하단 바 */}
         <div className="chat-input-wrap">
           <input
             type="text"

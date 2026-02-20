@@ -1,0 +1,319 @@
+/* ========== 프로필 페이지 ========== */
+
+.profile-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--color-black);
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(2px 2px at 50px 160px, #fff, transparent),
+    radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 130px 80px, #fff, transparent);
+  background-size: 200px 200px;
+  pointer-events: none;
+}
+
+.profile-back {
+  position: fixed;
+  top: max(1.5rem, env(safe-area-inset-top));
+  left: max(1.5rem, env(safe-area-inset-left));
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--color-gray);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.profile-back:hover {
+  color: var(--color-white);
+}
+
+/* 캐릭터 (좌측 하단) */
+.profile-character {
+  position: fixed;
+  left: 12%;
+  bottom: 0;
+  z-index: 1;
+  width: 48%;
+  max-width: 520px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  pointer-events: none;
+}
+
+.profile-character img {
+  width: 100%;
+  height: auto;
+  max-height: 90vh;
+  object-fit: contain;
+  object-position: left bottom;
+}
+
+/* 메인: 패널을 오른쪽 정렬 */
+.profile-main {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: max(2rem, env(safe-area-inset-top)) max(18%, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(2rem, env(safe-area-inset-left));
+}
+
+/* 패널 */
+.profile-panel {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+/* 아바타 */
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 0.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.profile-avatar-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.7;
+}
+
+/* 필드 */
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.profile-label {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-gray);
+}
+
+/* 입력 */
+.profile-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--color-white);
+  background: var(--color-black);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.profile-input::placeholder {
+  color: var(--color-gray-dim);
+  font-size: 0.8rem;
+}
+
+.profile-input:focus {
+  border-color: var(--color-white);
+}
+
+.profile-input--readonly {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* 비밀번호 래퍼 */
+.profile-input-pw-wrap {
+  position: relative;
+}
+
+.profile-input-pw-wrap .profile-input {
+  padding-right: 2.75rem;
+}
+
+.profile-pw-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  height: 28px;
+  margin: auto 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-gray);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  z-index: 1;
+}
+
+.profile-pw-toggle:hover {
+  color: var(--color-white);
+}
+
+/* 에러 메시지 */
+.profile-error {
+  font-size: 0.75rem;
+  color: #ff6b6b;
+  margin: 0;
+}
+
+/* 저장 메시지 */
+.profile-save-msg {
+  font-size: 0.8rem;
+  color: var(--color-mint);
+  text-align: center;
+  margin: 0;
+}
+
+/* 버튼 공통 */
+.profile-btn {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.profile-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* 저장 */
+.profile-btn--save {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-white);
+  margin-top: 0.2rem;
+}
+
+.profile-btn--save:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 로그아웃 */
+.profile-btn--logout {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-white);
+  margin-top: 1.2rem;
+}
+
+.profile-btn--logout:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 회원탈퇴 */
+.profile-btn--delete {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+}
+
+.profile-btn--delete:hover {
+  color: #ff6b6b;
+}
+
+/* 회원탈퇴 확인 모달 */
+.profile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-modal {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+}
+
+.profile-modal-text {
+  font-size: 0.95rem;
+  color: var(--color-white);
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+.profile-modal-btns {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.profile-modal-btn {
+  flex: 1;
+  height: 40px;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.profile-modal-btn--cancel {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-white);
+}
+
+.profile-modal-btn--confirm {
+  background: #ff4444;
+  color: #fff;
+}
+
+.profile-modal-btn--confirm:hover {
+  opacity: 0.85;
+}
+
+/* ========== 반응형 ========== */
+@media (max-width: 900px) {
+  .profile-character {
+    display: none;
+  }
+
+  .profile-main {
+    justify-content: center;
+    padding: max(4rem, env(safe-area-inset-top)) 1.5rem max(2rem, env(safe-area-inset-bottom));
+  }
+
+  .profile-panel {
+    max-width: 100%;
+  }
+}

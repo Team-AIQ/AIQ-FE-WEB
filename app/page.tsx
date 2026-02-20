@@ -151,27 +151,26 @@ export default function HomePage() {
     const about = aboutRef.current;
     if (!btn || !about) return;
 
-    let rafId: number;
-    const updateVisibility = () => {
-      rafId = requestAnimationFrame(() => {
-        if (!about || !btn) return;
-        const rect = about.getBoundingClientRect();
-        if (rect.top < window.innerHeight) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
           btn.classList.add("is-visible");
         } else {
-          btn.classList.remove("is-visible");
+          // about 섹션이 뷰포트 아래에 있을 때만 숨김 (위로 지나간 경우는 유지)
+          const rect = entry.boundingClientRect;
+          if (rect.top > 0) {
+            btn.classList.remove("is-visible");
+          }
         }
-      });
-    };
+      },
+      { threshold: 0 }
+    );
 
-    const handler = () => {
-      updateVisibility();
-    };
-    window.addEventListener("scroll", handler, { passive: true });
-    updateVisibility();
+    // about(2단)부터 footer까지 모두 감시 → 2단 이후 어디든 보이면 버튼 표시
+    observer.observe(about);
+
     return () => {
-      window.removeEventListener("scroll", handler);
-      if (rafId) cancelAnimationFrame(rafId);
+      observer.disconnect();
     };
   }, []);
 
@@ -620,8 +619,8 @@ export default function HomePage() {
         <svg
           className="btn-top-chevron"
           viewBox="0 0 12 10"
-          width={12}
-          height={10}
+          width={16}
+          height={14}
           aria-hidden="true"
         >
           <path

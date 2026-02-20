@@ -489,7 +489,7 @@ body::-webkit-scrollbar-thumb:hover {
   font-family: var(--font-body);
   font-size: 1rem;
   color: #45d38e;
-  margin: 0 0 1.5rem;
+  margin: 0 0 2rem;
 }
 
 .steps {
@@ -642,7 +642,7 @@ body::-webkit-scrollbar-thumb:hover {
   color: var(--color-gray-dim);
   font-size: 0.9rem;
   text-decoration: none;
-  margin: 7rem auto 0;
+  margin: 6rem auto 0;
   width: fit-content;
   transition: color 0.2s;
 }
@@ -654,12 +654,12 @@ body::-webkit-scrollbar-thumb:hover {
 /* ========== 3단: 앱 소개 + 다운로드 ========== */
 .app-section {
   position: relative;
-  padding: 2rem 1.5rem 0;
+  padding: 0 1.5rem;
   height: 100vh;
   min-height: 100vh;
   max-height: 100vh;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   box-sizing: border-box;
   overflow: hidden;
   transition:
@@ -682,10 +682,11 @@ body::-webkit-scrollbar-thumb:hover {
   gap: 3rem;
   max-width: 1100px;
   margin: 0 auto;
-  margin-bottom: 50px;
-  align-items: flex-end;
+  align-items: end;
+  align-content: end;
   width: 100%;
   padding-bottom: 0;
+  padding-top: 60px;
   transition:
     gap 0.35s ease,
     grid-template-columns 0.35s ease;
@@ -1179,14 +1180,14 @@ body::-webkit-scrollbar-thumb:hover {
 /* ========== 맨 위로 버튼 (2단부터 표시, 얇은 원 테두리 + 위쪽 세모, 초록) ========== */
 .btn-top {
   position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
+  bottom: 2rem;
+  right: 2rem;
   z-index: 999;
-  width: 1.5rem;
-  height: 1.5rem;
-  border: 1px solid var(--color-mint);
+  width: 3rem;
+  height: 3rem;
+  border: 1.5px solid var(--color-mint);
   border-radius: 50%;
-  background: var(--color-black);
+  background: rgba(0, 0, 0, 0.7);
   color: var(--color-mint);
   cursor: pointer;
   display: flex;
@@ -1202,6 +1203,7 @@ body::-webkit-scrollbar-thumb:hover {
     border-color 0.2s,
     color 0.2s;
   pointer-events: none;
+  backdrop-filter: blur(4px);
 }
 
 .btn-top.is-visible {
