@@ -602,6 +602,52 @@ body.chat-page {
   flex-shrink: 0;
 }
 
+/* 이어서 대화하기 영역 */
+.chat-continue-wrap {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 0.5rem;
+  flex-shrink: 0;
+}
+.chat-continue-btns {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+}
+.chat-recommend-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-recommend-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  padding-left: 4px;
+}
+.chat-recommend-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chat-recommend-chip {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(63, 221, 144, 0.4);
+  background: rgba(63, 221, 144, 0.1);
+  color: #3FDD90;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  font-family: "Pretendard", sans-serif;
+}
+.chat-recommend-chip:hover {
+  background: rgba(63, 221, 144, 0.2);
+  border-color: #3FDD90;
+}
+
 .chat-input-wrap {
   width: 100%;
   max-width: 520px;
@@ -867,9 +913,10 @@ body.chat-page {
 .chat-option-buttons {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-start;
   gap: 8px;
   margin-top: 6px;
-  margin-left: 32px;
+  margin-left: 0;
 }
 
 .chat-option-btn {
@@ -1041,64 +1088,67 @@ body.chat-page {
   word-break: keep-all;
 }
 
-/* 아래: 카드 3개 */
+/* 아래: 카드 3개 — 높이 동일하게 */
 .rpt-ai-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  grid-auto-rows: 1fr;
+  gap: 16px;
 }
 
-/* 카드 공통 */
+/* 카드 공통 — 좌상단만 각진 형태 (기획서) */
 .rpt-ai-card-new {
-  border: 1px solid rgba(63, 221, 144, 0.35);
-  border-radius: 20px;
+  border: 1px solid rgba(63, 221, 144, 0.3);
+  border-radius: 4px 20px 20px 20px;
   background: rgba(0, 0, 0, 0.85);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 260px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* 카드 헤더: 로고 + 이름 (초록색) */
 .rpt-ai-card-head {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 16px 10px;
-  color: rgba(63, 221, 144, 0.95);
-  font-weight: 800;
-  font-size: 0.9rem;
+  gap: 8px;
+  padding: 16px 16px 12px;
 }
 
-.rpt-ai-icon {
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.rpt-ai-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 4px;
   flex-shrink: 0;
 }
 
-.rpt-ai-icon svg {
-  width: 26px;
-  height: 26px;
-  display: block;
-  border-radius: 8px;
+.rpt-ai-icon--hidden {
+  display: none !important;
 }
 
+.rpt-ai-label {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #3FDD90;
+}
+
+/* 카드 본문 */
 .rpt-ai-card-body-new {
-  padding: 0 12px 8px;
+  padding: 0 16px 12px;
   color: #ddd;
-  font-size: 0.72rem;
-  line-height: 1.5;
+  font-size: 0.78rem;
+  line-height: 1.6;
   flex: 1;
   overflow: hidden;
-  max-height: 100px;
 }
 
 .rpt-ai-card-item-new strong {
   display: block;
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   color: #fff;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 700;
 }
 
@@ -1106,13 +1156,13 @@ body.chat-page {
   margin: 0;
   padding-left: 1.1em;
   list-style: disc;
-  font-size: 0.72rem;
-  line-height: 1.55;
+  font-size: 0.78rem;
+  line-height: 1.6;
   color: #d8d8d8;
 }
 
 .rpt-ai-card-reasons li {
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 
 /* OFF 카드 */
@@ -1145,28 +1195,28 @@ body.chat-page {
   opacity: 0.9;
 }
 
-/* 하단 전체보기 버튼 — 기획서 스타일 */
+/* 하단 전체보기 버튼 — 플랫 민트 (그라데이션 없음) */
 .rpt-ai-card-btn-new {
   margin: auto 0 0;
   width: 100%;
-  height: 42px;
+  height: 48px;
   border: none;
-  border-radius: 0 0 20px 20px;
-  background: linear-gradient(180deg, rgba(63, 221, 144, 0.7) 0%, rgba(63, 221, 144, 0.95) 100%);
+  border-radius: 0;
+  background: #3FDD90;
   color: #0b0b0b;
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: opacity 0.2s;
 }
 
 .rpt-ai-card-btn-new:hover {
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 .rpt-ai-card-btn-new:disabled {
-  background: rgba(63, 221, 144, 0.2);
-  color: rgba(255, 255, 255, 0.5);
+  background: rgba(63, 221, 144, 0.15);
+  color: rgba(255, 255, 255, 0.4);
   cursor: not-allowed;
 }
 
@@ -1206,6 +1256,22 @@ body.chat-page {
   font-weight: 700;
   color: rgba(63, 221, 144, 0.95);
   margin-bottom: 0;
+}
+
+.rpt-product-image {
+  width: 100%;
+  max-width: 140px;
+  margin: 6px 0;
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.rpt-product-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .rpt-product-specs {
@@ -1270,19 +1336,17 @@ body.chat-page {
 
 .rpt-panel-name {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 800;
-  color: rgba(63, 221, 144, 0.95);
+  color: #3FDD90;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.rpt-panel-name svg {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  flex-shrink: 0;
+.rpt-panel-name .rpt-ai-logo {
+  width: 22px;
+  height: 22px;
 }
 
 .rpt-panel-back {
@@ -1460,8 +1524,15 @@ body.chat-page {
 
 /* 선택된 AI 카드 하이라이트 */
 .rpt-ai-card-new.is-selected {
-  border-color: rgba(63, 221, 144, 0.7);
-  box-shadow: 0 0 12px rgba(63, 221, 144, 0.2);
+  border-color: #3FDD90;
+  border-width: 2px;
+  box-shadow: 0 0 20px rgba(63, 221, 144, 0.4), 0 0 40px rgba(63, 221, 144, 0.15);
+  background: rgba(0, 20, 10, 0.95);
+}
+
+/* 선택된 카드가 있으면 나머지 카드는 반투명 */
+.rpt-ai-row:has(.is-selected) .rpt-ai-card-new:not(.is-selected) {
+  opacity: 0.5;
 }
 
 /* ===== 인라인 AI 패널 (우하) ===== */

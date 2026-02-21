@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { getUserNickname , getUserId, getAccessToken, isGuest, clearTokens} from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
+import { initRewardedAd, showRewardedAd } from "@/lib/ad";
 import HelpModal from "@/components/HelpModal";
 
 // @ts-ignore
@@ -110,10 +111,17 @@ const AI_ICONS: Record<string, JSX.Element> = {
 };
 
 const AI_MODELS = [
-  { key: "gpt", label: "Chat GPT" },
-  { key: "gemini", label: "Gemini" },
-  { key: "perplexity", label: "Perplexity" },
+  { key: "gpt", label: "Chat GPT", logo: "/image/gpt-logo.png" },
+  { key: "gemini", label: "Gemini", logo: "/image/gemini-logo.png" },
+  { key: "perplexity", label: "Perplexity", logo: "/image/perp-logo.png" },
 ];
+
+// 크레딧 소진 비용
+const CREDIT_COST = {
+  BASIC_QUERY: 3,        // 일반 질문 (단발성 질의 및 기본 분석)
+  EXPAND_COMPARE: 10,    // 3개 모델 확장 비교
+  CONTINUE_CHAT: 10,     // 이어서 대화하기
+} as const;
 
 export default function ChatPage() {
   const [inputValue, setInputValue] = useState("");
@@ -123,11 +131,15 @@ export default function ChatPage() {
 
   // 리포트 상태 관리
   const [reportPhase, setReportPhase] = useState<"idle" | "generating" | "report">("idle");
-  // 리포트 완료 후 대화 모드: "select" = 완료하기/대화하기 선택, "conversation" = 비교후보/이어서 선택
-  const [postReportMode, setPostReportMode] = useState<"select" | "conversation" | null>(null);
+  // 리포트 완료 후 대화 모드: "select" = 완료하기/대화하기 선택, "conversation" = 비교후보/이어서 선택, "freeChat" = 자유 입력
+  const [postReportMode, setPostReportMode] = useState<"select" | "conversation" | "freeChat" | null>(null);
 
   // 리포트 패널: 선택된 AI 키 (전체보기)
   const [selectedAiKey, setSelectedAiKey] = useState<string | null>(null);
+  // 제품 추천 표시 개수 (기본 1개, 확장 시 3개)
+  const [productDisplayCount, setProductDisplayCount] = useState(1);
+  // 이어서 질문하기 모드: 리포트 유지하면서 추가 대화
+  const [continueQueryId, setContinueQueryId] = useState<number | null>(null);
 
   // 데이터 관리 상태
   const [curationData, setCurationData] = useState<CurationResponse | null>(null);
@@ -136,6 +148,7 @@ export default function ChatPage() {
   const [aiToggles, setAiToggles] = useState({ chatgpt: true, gemini: true, perplexity: true });
   const aiTogglesRef = useRef(aiToggles);
   const [isGuestUser, setIsGuestUser] = useState(true);
+  const [userCredit, setUserCredit] = useState<number>(0);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [historyList, setHistoryList] = useState<HistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -171,6 +184,8 @@ export default function ChatPage() {
     setInputValue("");
     setSelectedAiKey(null);
     setActiveHistoryId(null);
+    setProductDisplayCount(1);
+    setContinueQueryId(null);
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
       eventSourceRef.current = null;
@@ -183,9 +198,12 @@ export default function ChatPage() {
       setUserNickname(nickname);
     }
     setIsGuestUser(isGuest());
-    // 로그인 사용자면 히스토리 목록 불러오기
+    // 로그인 사용자면 히스토리 목록 불러오기 + 광고 초기화 + 크레딧 조회
     if (!isGuest()) {
       fetchHistory();
+      fetchCredit();
+      const userId = getUserId();
+      if (userId) initRewardedAd(String(userId));
     }
   }, []);
 
@@ -201,6 +219,18 @@ export default function ChatPage() {
       console.error("히스토리 조회 실패:", e);
     } finally {
       setHistoryLoading(false);
+    }
+  };
+
+  const fetchCredit = async () => {
+    try {
+      const res = await apiFetch("/api/v1/user/credit");
+      if (res.ok) {
+        const json = await res.json();
+        setUserCredit(json.data?.credit ?? json.data ?? 0);
+      }
+    } catch (e) {
+      console.error("크레딧 조회 실패:", e);
     }
   };
 
@@ -372,6 +402,16 @@ export default function ChatPage() {
   };
 
   const submitAnswers = async (data: CurationResponse) => {
+    // 크레딧 부족 체크
+    if (!isGuestUser && userCredit < CREDIT_COST.BASIC_QUERY) {
+      setMessages(prev => [...prev, {
+        id: generateId(),
+        text: `크레딧이 부족합니다. 리포트 생성에 ${CREDIT_COST.BASIC_QUERY}C가 필요합니다. (현재 ${userCredit}C)\n광고를 시청하여 크레딧을 충전해주세요.`,
+        isUser: false,
+      }]);
+      return;
+    }
+
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
@@ -473,6 +513,8 @@ export default function ChatPage() {
 
           setReportPhase("report");
           setPostReportMode("select");
+          // 리포트 생성 후 크레딧 갱신
+          fetchCredit();
         }
       } catch (e) {
         console.error("데이터 파싱 에러", e);
@@ -582,6 +624,60 @@ export default function ChatPage() {
 
   const historyGroups = groupHistoryByDate(historyList);
 
+  // 이어서 질문하기 (리포트 유지하면서 추가 대화)
+  const handleContinueChat = async () => {
+    const trimmed = inputValue.trim();
+    if (!trimmed) return;
+
+    const userMsg: Message = {
+      id: generateId(),
+      text: trimmed,
+      isUser: true,
+    };
+    setMessages(prev => [...prev, userMsg]);
+    setInputValue("");
+
+    // queryId 기반으로 이어서 질문 API 호출
+    const qId = continueQueryId || curationData?.queryId;
+    if (!qId) {
+      setMessages(prev => [...prev, {
+        id: generateId(),
+        text: "이전 대화 정보를 찾을 수 없습니다. 새로운 질문을 시작해주세요.",
+        isUser: false,
+      }]);
+      return;
+    }
+
+    try {
+      const res = await apiFetch(`/api/v1/curation/${qId}/continue`, {
+        method: "POST",
+        body: JSON.stringify({ question: trimmed }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        setMessages(prev => [...prev, {
+          id: generateId(),
+          text: json.data?.answer || json.message || "답변을 받았습니다.",
+          isUser: false,
+        }]);
+      } else {
+        setMessages(prev => [...prev, {
+          id: generateId(),
+          text: "답변을 가져오는데 실패했습니다. 다시 시도해주세요.",
+          isUser: false,
+        }]);
+      }
+    } catch (e) {
+      console.error("이어서 질문 실패:", e);
+      setMessages(prev => [...prev, {
+        id: generateId(),
+        text: "서버 연결에 실패했습니다.",
+        isUser: false,
+      }]);
+    }
+  };
+
   // ===== 인라인 리포트 렌더링 =====
   const renderReport = (msg: Message) => {
     const report = msg.reportData;
@@ -625,15 +721,20 @@ export default function ChatPage() {
           {report.topProducts && report.topProducts.length > 0 && (
             <div className="rpt-products-panel">
               <h3 className="rpt-products-panel-title">
-                추천 제품 TOP {report.topProducts.length}
+                추천 제품 TOP {Math.min(productDisplayCount, report.topProducts.length)}
               </h3>
-              {report.topProducts.map((product, idx) => (
+              {report.topProducts.slice(0, productDisplayCount).map((product, idx) => (
                 <div key={idx} className="rpt-product-card">
                   <div className="rpt-product-header">
                     <span className="rpt-product-rank">{product.rank || idx + 1}위</span>
                     <span className="rpt-product-name">{product.productName}</span>
                     {product.price && <span className="rpt-product-price">{product.price}</span>}
                   </div>
+                  {product.productImage && (
+                    <div className="rpt-product-image">
+                      <img src={product.productImage} alt={product.productName} onError={(e) => (e.currentTarget.style.display = "none")} />
+                    </div>
+                  )}
                   {product.specs && Object.keys(product.specs).length > 0 && (
                     <div className="rpt-product-specs">
                       {Object.entries(product.specs).slice(0, 4).map(([key, val]) => (
@@ -641,7 +742,7 @@ export default function ChatPage() {
                       ))}
                     </div>
                   )}
-                  <p className="rpt-product-analysis">{renderFormattedText(product.comparativeAnalysis)}</p>
+                  <div className="rpt-product-analysis">{renderFormattedText(product.comparativeAnalysis)}</div>
                   {product.lowestPriceLink && (
                     <a
                       href={product.lowestPriceLink}
@@ -662,12 +763,13 @@ export default function ChatPage() {
         <div className="rpt-cell rpt-cell--ai-cards">
           {hasAiResponses && (
             <div className="rpt-ai-row">
-              {AI_MODELS.map(({ key, label }) => {
+              {AI_MODELS.map(({ key, label, logo }) => {
                 const found = findAiData(aiResp, key);
                 return (
                   <div key={key} className={`rpt-ai-card-new ${!found ? "is-off" : ""}${selectedAiKey === key ? " is-selected" : ""}`}>
                     <div className="rpt-ai-card-head">
-                      <span className="rpt-ai-icon">{AI_ICONS[key]}</span>
+                      <img src={logo} alt={label} className="rpt-ai-logo" onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.nextElementSibling?.classList.remove("rpt-ai-icon--hidden"); }} />
+                      <span className="rpt-ai-icon rpt-ai-icon--hidden">{AI_ICONS[key]}</span>
                       <span className="rpt-ai-label">{label}</span>
                     </div>
 
@@ -677,7 +779,7 @@ export default function ChatPage() {
                           <div key={i} className="rpt-ai-card-item-new">
                             <strong>1. {rec.modelName || rec.targetAudience}</strong>
                             <ul className="rpt-ai-card-reasons">
-                              {rec.selectionReasons?.slice(0, 2).map((r, ri) => (
+                              {rec.selectionReasons?.map((r, ri) => (
                                 <li key={ri}>{r}</li>
                               ))}
                             </ul>
@@ -714,7 +816,13 @@ export default function ChatPage() {
             <div className="rpt-panel-inline">
               <div className="rpt-panel-head">
                 <h3 className="rpt-panel-name">
-                  {selectedAiKey && AI_ICONS[selectedAiKey]}{" "}
+                  {selectedAiKey && (
+                    <img
+                      src={AI_MODELS.find(m => m.key === selectedAiKey)?.logo}
+                      alt={panelLabel}
+                      className="rpt-ai-logo"
+                    />
+                  )}
                   {panelLabel}
                 </h3>
                 <button
@@ -814,10 +922,22 @@ export default function ChatPage() {
                   <circle cx="8" cy="8" r="7" stroke="#3FDD90" strokeWidth="1.5" />
                   <text x="8" y="11" textAnchor="middle" fill="#3FDD90" fontSize="9" fontWeight="bold">C</text>
                 </svg>
-                20 크레딧
+                {userCredit} 크레딧
               </span>
-              <button type="button" className="chat-sidebar-credit-ad">
-                광고보기(1)
+              <button
+                type="button"
+                className="chat-sidebar-credit-ad"
+                onClick={() => {
+                  const shown = showRewardedAd(() => {
+                    fetchCredit();
+                    alert("광고 시청 완료! 1 크레딧이 지급되었습니다.");
+                  });
+                  if (!shown) {
+                    alert("광고를 준비 중입니다. 잠시 후 다시 시도해주세요.");
+                  }
+                }}
+              >
+                광고보기
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <rect x="2" y="4" width="12" height="8" rx="1" />
                   <polygon points="7,7 7,11 10,9" fill="currentColor" stroke="none" />
@@ -1086,6 +1206,10 @@ export default function ChatPage() {
                   type="button"
                   className="rpt-bottom-btn rpt-bottom-btn--secondary"
                   onClick={() => {
+                    // 현재 리포트의 queryId 저장
+                    if (curationData?.queryId) {
+                      setContinueQueryId(curationData.queryId);
+                    }
                     setMessages(prev => [...prev, {
                       id: generateId(),
                       text: "요청이 필요한 버튼을 선택해줘!",
@@ -1098,28 +1222,70 @@ export default function ChatPage() {
                 </button>
               </div>
             ) : reportPhase === "report" && postReportMode === "conversation" ? (
-              <div className="chat-bottom-btns">
+              <div className="chat-continue-wrap">
+                <div className="chat-continue-btns">
+                  <button
+                    type="button"
+                    className="rpt-bottom-btn rpt-bottom-btn--primary"
+                    onClick={() => {
+                      setProductDisplayCount(3);
+                    }}
+                  >
+                    비교후보 3개로 확장
+                  </button>
+                  <button
+                    type="button"
+                    className="rpt-bottom-btn rpt-bottom-btn--secondary"
+                    onClick={() => {
+                      setPostReportMode("freeChat");
+                    }}
+                  >
+                    이어서 질문하기
+                  </button>
+                </div>
+                <div className="chat-recommend-questions">
+                  <span className="chat-recommend-label">추천 질문</span>
+                  <div className="chat-recommend-chips">
+                    {[
+                      "1위 제품의 장단점을 더 자세히 알려줘",
+                      "가성비가 가장 좋은 제품은 뭐야?",
+                      "비슷한 다른 제품도 추천해줘",
+                    ].map((q, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className="chat-recommend-chip"
+                        onClick={() => {
+                          setPostReportMode("freeChat");
+                          setInputValue(q);
+                        }}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : reportPhase === "report" && postReportMode === "freeChat" ? (
+              <div className="chat-input-wrap">
+                <input
+                    type="text"
+                    className="chat-input"
+                    placeholder="리포트에 대해 궁금한 점을 물어보세요"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") handleContinueChat();
+                    }}
+                    aria-label="이어서 질문 입력"
+                />
                 <button
-                  type="button"
-                  className="rpt-bottom-btn rpt-bottom-btn--primary"
-                  onClick={() => {
-                    // TODO: 비교후보 3개로 확장 (C-8) 기능
-                    resetToInitial();
-                  }}
+                    type="button"
+                    className="chat-send-btn"
+                    aria-label="보내기"
+                    onClick={handleContinueChat}
                 >
-                  비교후보 3개로 확장
-                </button>
-                <button
-                  type="button"
-                  className="rpt-bottom-btn rpt-bottom-btn--secondary"
-                  onClick={() => {
-                    // 이어서 질문하기: 리포트를 유지하면서 입력 모드로 전환
-                    setReportPhase("idle");
-                    setPostReportMode(null);
-                    setCurationData(null);
-                  }}
-                >
-                  이어서 질문하기
+                  <img src="/image/chat-send-icon.png" alt="" className="chat-send-icon" aria-hidden />
                 </button>
               </div>
             ) : (

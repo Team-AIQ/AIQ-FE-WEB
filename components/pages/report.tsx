@@ -161,7 +161,7 @@ export default function ReportPage() {
                                   ))}
                                 </div>
                               )}
-                              <p className="rpt-product-analysis">{product.comparativeAnalysis}</p>
+                              <div className="rpt-product-analysis">{product.comparativeAnalysis}</div>
                               {product.lowestPriceLink && (
                                 <a
                                   href={product.lowestPriceLink}
