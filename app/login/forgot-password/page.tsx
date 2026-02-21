@@ -212,6 +212,21 @@ export default function ForgotPasswordPage() {
     }
   };
 
+  const handleCodePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+
+    const pastedData = e.clipboardData.getData("text").trim();
+
+    if (!/^\d{6}$/.test(pastedData)) return;
+
+    const newCode = pastedData.split("").slice(0, 6);
+
+    setCode(newCode);
+
+    // 마지막 칸으로 포커스 이동
+    codeInputRefs.current[5]?.focus();
+  };
+
   return (
     <>
       <div className="login-bg" role="presentation" />
@@ -337,6 +352,7 @@ export default function ForgotPasswordPage() {
                     value={digit}
                     onChange={(e) => handleCodeChange(i, e.target.value)}
                     onKeyDown={(e) => handleCodeKeyDown(i, e)}
+                    onPaste={(e) => handleCodePaste(e)}
                     aria-label={`코드 ${i + 1}자리`}
                   />
                 ))}
