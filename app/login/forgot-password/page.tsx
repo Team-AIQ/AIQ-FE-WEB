@@ -7,7 +7,8 @@ import { requestResetCode, verifyResetCode, resetPassword } from "@/lib/api";
 
 const CODE_LENGTH = 6;
 /** 비밀번호: 영문 소문자, 숫자 포함 8~16자 (특수문자 허용) */
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*\d)[a-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]{8,16}$/;
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*\d)[a-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]{8,16}$/;
 function isValidPassword(value: string) {
   return PASSWORD_REGEX.test(value);
 }
@@ -45,7 +46,9 @@ function isAllowedEmailDomain(email: string): boolean {
   const part = email.trim().split("@")[1];
   if (!part) return false;
   const domain = part.toLowerCase();
-  return ALLOWED_EMAIL_DOMAINS.some((d) => domain === d || domain.endsWith("." + d));
+  return ALLOWED_EMAIL_DOMAINS.some(
+    (d) => domain === d || domain.endsWith("." + d),
+  );
 }
 
 function formatTimer(seconds: number) {
@@ -90,7 +93,7 @@ export default function ForgotPasswordPage() {
     if (resendCooldown <= 0) return;
     const t = setInterval(
       () => setResendCooldown((c) => (c <= 0 ? 0 : c - 1)),
-      1000
+      1000,
     );
     return () => clearInterval(t);
   }, [resendCooldown]);
@@ -116,7 +119,8 @@ export default function ForgotPasswordPage() {
       setStep(2);
       setTimer(TIMER_START);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "인증 코드 발송에 실패했습니다.";
+      const msg =
+        err instanceof Error ? err.message : "인증 코드 발송에 실패했습니다.";
       setError(msg);
     } finally {
       setLoading(false);
@@ -135,7 +139,7 @@ export default function ForgotPasswordPage() {
 
   const handleCodeKeyDown = (
     index: number,
-    e: React.KeyboardEvent<HTMLInputElement>
+    e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     if (e.key === "Backspace" && !code[index] && index > 0) {
       codeInputRefs.current[index - 1]?.focus();
@@ -165,7 +169,8 @@ export default function ForgotPasswordPage() {
       setResetToken(token);
       setStep(3);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "코드 검증에 실패했습니다.";
+      const msg =
+        err instanceof Error ? err.message : "코드 검증에 실패했습니다.";
       setError(msg);
     }
   };
@@ -173,12 +178,13 @@ export default function ForgotPasswordPage() {
   const isCodeFilled = code.every((c) => c !== "");
 
   const isPasswordValid = isValidPassword(newPassword);
-  const isConfirmMatch = newPassword === confirmPassword && confirmPassword.length > 0;
+  const isConfirmMatch =
+    newPassword === confirmPassword && confirmPassword.length > 0;
   // 비밀번호가 유효하고, 두 비밀번호가 일치하며, 에러가 없을 때 활성화
-  const canSubmitPassword = 
-    newPassword.length > 0 && 
-    confirmPassword.length > 0 && 
-    isPasswordValid && 
+  const canSubmitPassword =
+    newPassword.length > 0 &&
+    confirmPassword.length > 0 &&
+    isPasswordValid &&
     isConfirmMatch;
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -198,7 +204,8 @@ export default function ForgotPasswordPage() {
       await resetPassword(resetToken, newPassword);
       router.replace("/login?view=email");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "비밀번호 변경에 실패했습니다.";
+      const msg =
+        err instanceof Error ? err.message : "비밀번호 변경에 실패했습니다.";
       setConfirmError(msg);
     } finally {
       setSubmitLoading(false);
@@ -232,7 +239,7 @@ export default function ForgotPasswordPage() {
 
       <div className="login-character" role="presentation">
         <img
-          src="/image/login-character.png"
+          src="/image/hmm-pickle.png"
           alt=""
           onError={(e) => (e.currentTarget.style.display = "none")}
         />
@@ -274,7 +281,9 @@ export default function ForgotPasswordPage() {
                         return;
                       }
                       if (!isAllowedEmailDomain(v)) {
-                        setError("naver.com, gmail.com 등 지원하는 이메일 주소로 입력해주세요.");
+                        setError(
+                          "naver.com, gmail.com 등 지원하는 이메일 주소로 입력해주세요.",
+                        );
                         return;
                       }
                       setError("");
@@ -290,7 +299,11 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   className="login-btn login-btn--primary"
-                  disabled={loading || !isValidEmailFormat(email) || !isAllowedEmailDomain(email)}
+                  disabled={
+                    loading ||
+                    !isValidEmailFormat(email) ||
+                    !isAllowedEmailDomain(email)
+                  }
                 >
                   {loading ? "처리 중…" : "다음"}
                 </button>
@@ -363,7 +376,10 @@ export default function ForgotPasswordPage() {
                 이전에 설정하지 않은 새로운 비밀번호를 입력해 주세요
               </p>
 
-              <form className="login-forgot-form" onSubmit={handlePasswordSubmit}>
+              <form
+                className="login-forgot-form"
+                onSubmit={handlePasswordSubmit}
+              >
                 <div className="login-input-wrap signup-input-wrap--password">
                   <label htmlFor="forgot-new-password" className="login-label">
                     비밀번호
@@ -392,7 +408,9 @@ export default function ForgotPasswordPage() {
                       }}
                       onBlur={() => {
                         if (newPassword && !isValidPassword(newPassword)) {
-                          setPasswordError("영문 소문자, 숫자 포함 8~16자로 입력해주세요.");
+                          setPasswordError(
+                            "영문 소문자, 숫자 포함 8~16자로 입력해주세요.",
+                          );
                         } else {
                           setPasswordError("");
                         }
@@ -402,15 +420,33 @@ export default function ForgotPasswordPage() {
                       type="button"
                       className="login-password-toggle"
                       onClick={() => setShowNewPassword((v) => !v)}
-                      aria-label={showNewPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+                      aria-label={
+                        showNewPassword ? "비밀번호 숨기기" : "비밀번호 보기"
+                      }
                     >
                       {showNewPassword ? (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          aria-hidden
+                        >
                           <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                           <line x1="1" y1="1" x2="23" y2="23" />
                         </svg>
                       ) : (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          aria-hidden
+                        >
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                           <circle cx="12" cy="12" r="3" />
                         </svg>
@@ -418,12 +454,17 @@ export default function ForgotPasswordPage() {
                     </button>
                   </div>
                   {passwordError && (
-                    <p className="login-input-error-msg" role="alert">{passwordError}</p>
+                    <p className="login-input-error-msg" role="alert">
+                      {passwordError}
+                    </p>
                   )}
                 </div>
 
                 <div className="login-input-wrap signup-input-wrap--password">
-                  <label htmlFor="forgot-confirm-password" className="login-label">
+                  <label
+                    htmlFor="forgot-confirm-password"
+                    className="login-label"
+                  >
                     비밀번호 확인
                   </label>
                   <div className="login-password-inner">
@@ -439,11 +480,14 @@ export default function ForgotPasswordPage() {
                         setConfirmError(
                           e.target.value && newPassword !== e.target.value
                             ? "비밀번호가 일치하지 않습니다"
-                            : ""
+                            : "",
                         );
                       }}
                       onBlur={() => {
-                        if (confirmPassword && newPassword !== confirmPassword) {
+                        if (
+                          confirmPassword &&
+                          newPassword !== confirmPassword
+                        ) {
                           setConfirmError("비밀번호가 일치하지 않습니다");
                         }
                       }}
@@ -452,15 +496,35 @@ export default function ForgotPasswordPage() {
                       type="button"
                       className="login-password-toggle"
                       onClick={() => setShowConfirmPassword((v) => !v)}
-                      aria-label={showConfirmPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+                      aria-label={
+                        showConfirmPassword
+                          ? "비밀번호 숨기기"
+                          : "비밀번호 보기"
+                      }
                     >
                       {showConfirmPassword ? (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          aria-hidden
+                        >
                           <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                           <line x1="1" y1="1" x2="23" y2="23" />
                         </svg>
                       ) : (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          aria-hidden
+                        >
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                           <circle cx="12" cy="12" r="3" />
                         </svg>
@@ -468,7 +532,9 @@ export default function ForgotPasswordPage() {
                     </button>
                   </div>
                   {confirmError && (
-                    <p className="login-input-error-msg" role="alert">{confirmError}</p>
+                    <p className="login-input-error-msg" role="alert">
+                      {confirmError}
+                    </p>
                   )}
                 </div>
 
