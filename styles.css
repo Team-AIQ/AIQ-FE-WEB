@@ -1983,4 +1983,5 @@ body::-webkit-scrollbar-thumb:hover {
   pointer-events: none;
   width: 100vw;
   height: 100vh;
+  transition: opacity 0.5s ease;
 }

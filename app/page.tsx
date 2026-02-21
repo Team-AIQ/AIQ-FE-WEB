@@ -100,11 +100,12 @@ export default function HomePage() {
   const router = useRouter(); // 3. router 인스턴스 생성
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 4. 로그인 상태 추가
 
-  // 마우스를 따라 별빛 파티클이 흩날리는 효과
+  // 마우스를 따라 별빛 파티클이 흩날리는 효과 (hero 1단에서만)
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const heroEl = heroRef.current;
+    if (!canvas || !heroEl) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -112,6 +113,7 @@ export default function HomePage() {
     let mouseX = -100;
     let mouseY = -100;
     let lastSpawn = 0;
+    let inHero = true;
 
     interface Particle {
       x: number; y: number; vx: number; vy: number;
@@ -136,11 +138,26 @@ export default function HomePage() {
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
+      // hero 영역 안에 있는지 확인
+      const rect = heroEl.getBoundingClientRect();
+      inHero = e.clientY >= rect.top && e.clientY <= rect.bottom;
     };
     window.addEventListener("mousemove", handleMouseMove);
 
+    // 스크롤 시에도 hero 영역 체크
+    const handleScroll = () => {
+      const rect = heroEl.getBoundingClientRect();
+      inHero = rect.bottom > 0 && rect.top < window.innerHeight;
+      if (!inHero) {
+        canvas.style.opacity = "0";
+      } else {
+        canvas.style.opacity = "1";
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     const spawnParticles = (now: number) => {
-      if (now - lastSpawn < 30) return; // 30ms마다 생성
+      if (!inHero || now - lastSpawn < 30) return;
       lastSpawn = now;
       for (let i = 0; i < 3; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -171,19 +188,16 @@ export default function HomePage() {
 
         if (p.alpha <= 0) { particles.splice(i, 1); continue; }
 
-        // 별빛 십자가 모양
         ctx.save();
         ctx.globalAlpha = p.alpha;
         ctx.fillStyle = p.color + p.alpha + ")";
         ctx.shadowBlur = 6;
         ctx.shadowColor = p.color + "0.5)";
 
-        // 중심 원
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
 
-        // 십자 빛줄기
         ctx.strokeStyle = p.color + p.alpha * 0.5 + ")";
         ctx.lineWidth = p.size * 0.3;
         ctx.beginPath();
@@ -204,6 +218,7 @@ export default function HomePage() {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 

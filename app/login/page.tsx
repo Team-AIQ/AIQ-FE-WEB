@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import {apiFetch} from "@/lib/api";
-import {setTokens, isOnboardingDone} from "@/lib/auth";
+import { apiFetch } from "@/lib/api";
+import { setTokens, isOnboardingDone } from "@/lib/auth";
 import TermsModal from "@/components/TermsModal";
 import PrivacyModal from "@/components/PrivacyModal";
 
@@ -36,7 +36,8 @@ export default function LoginPage() {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const handleGuestLogin = async () => {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+      const API_BASE =
+        process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
       const res = await fetch(`${API_BASE}/api/auth/guest`, {
         method: "POST",
       });
@@ -78,7 +79,7 @@ export default function LoginPage() {
 
       const response = await apiFetch("/api/auth/login", {
         method: "POST",
-        body: JSON.stringify({ email, password , isRememberMe}),
+        body: JSON.stringify({ email, password, isRememberMe }),
       });
 
       console.log("서버 응답 상태:", response.status); // 응답 코드 확인 (200, 404, 500 등)
@@ -129,13 +130,21 @@ export default function LoginPage() {
           ← 뒤로가기
         </a>
       ) : (
-        <Link href="/#hero" className="login-back" aria-label="랜딩페이지 1단으로 돌아가기">
+        <Link
+          href="/#hero"
+          className="login-back"
+          aria-label="랜딩페이지 1단으로 돌아가기"
+        >
           ← 뒤로가기
         </Link>
       )}
 
       <div className="login-character" role="presentation">
-        <img src="/image/login-character.png" alt="" onError={(e) => (e.currentTarget.style.display = "none")} />
+        <img
+          src="/image/login-character.png"
+          alt=""
+          onError={(e) => (e.currentTarget.style.display = "none")}
+        />
       </div>
 
       <main className="login-main">
@@ -145,26 +154,51 @@ export default function LoginPage() {
               src="/image/login-logo.png"
               alt="AIQ"
               className="login-logo-img"
-              onError={(e) => e.currentTarget.parentElement?.classList.add("fallback")}
+              onError={(e) =>
+                e.currentTarget.parentElement?.classList.add("fallback")
+              }
             />
             <span className="login-logo-fallback">
               <span className="logo-icon">A</span>
               <span className="logo-text">AIQ</span>
             </span>
           </Link>
-          <p className="login-tagline">지구인을 위한 새로운 쇼핑 판단 기준</p>
 
           {view === "social" ? (
             <>
               <div className="login-social">
-                <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/oauth2/authorization/kakao?origin=web`} className="login-social-btn" id="btn-kakao" aria-label="카카오로 로그인">
-                  <img src="/image/login-btn-kakao.png" alt="카카오로 계속하기" />
+                <a
+                  href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/oauth2/authorization/kakao?origin=web`}
+                  className="login-social-btn"
+                  id="btn-kakao"
+                  aria-label="카카오로 로그인"
+                >
+                  <img
+                    src="/image/login-btn-kakao.png"
+                    alt="카카오로 계속하기"
+                  />
                 </a>
-                <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/oauth2/authorization/google?origin=web`} className="login-social-btn" id="btn-google" aria-label="Google로 로그인">
-                  <img src="/image/login-btn-google.png" alt="Google로 계속하기" />
+                <a
+                  href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/oauth2/authorization/google?origin=web`}
+                  className="login-social-btn"
+                  id="btn-google"
+                  aria-label="Google로 로그인"
+                >
+                  <img
+                    src="/image/login-btn-google.png"
+                    alt="Google로 계속하기"
+                  />
                 </a>
-                <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/oauth2/authorization/naver?origin=web`} className="login-social-btn" id="btn-naver" aria-label="네이버로 로그인">
-                  <img src="/image/login-btn-naver.png" alt="네이버로 계속하기" />
+                <a
+                  href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/oauth2/authorization/naver?origin=web`}
+                  className="login-social-btn"
+                  id="btn-naver"
+                  aria-label="네이버로 로그인"
+                >
+                  <img
+                    src="/image/login-btn-naver.png"
+                    alt="네이버로 계속하기"
+                  />
                 </a>
               </div>
 
@@ -180,8 +214,7 @@ export default function LoginPage() {
                 >
                   이용약관
                 </a>
-                <br />
-                및{" "}
+                <br />및{" "}
                 <a
                   href="#"
                   className="login-link"
@@ -196,13 +229,26 @@ export default function LoginPage() {
               </p>
 
               <div className="login-email-links">
-                <button type="button" className="login-email-link-btn" onClick={() => setView("email")}>
+                <button
+                  type="button"
+                  className="login-email-link-btn"
+                  onClick={() => setView("email")}
+                >
                   이메일로 로그인
                 </button>
                 <span className="sep">|</span>
                 <Link href="/signup">이메일로 가입</Link>
                 <span className="sep">|</span>
-                <a href="#" className="login-guest-link" onClick={(e) => { e.preventDefault(); handleGuestLogin(); }}>비회원 체험하기</a>
+                <a
+                  href="#"
+                  className="login-guest-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleGuestLogin();
+                  }}
+                >
+                  비회원 체험하기
+                </a>
               </div>
             </>
           ) : (
@@ -219,10 +265,15 @@ export default function LoginPage() {
                     if (emailError) setEmailError("");
                   }}
                   onBlur={() => {
-                    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) setEmailError("이메일이 올바르지 않습니다");
+                    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+                      setEmailError("이메일이 올바르지 않습니다");
                   }}
                 />
-                {emailError && <p className="login-input-error-msg" role="alert">{emailError}</p>}
+                {emailError && (
+                  <p className="login-input-error-msg" role="alert">
+                    {emailError}
+                  </p>
+                )}
               </div>
               <div className="login-input-wrap login-input-wrap--password">
                 <input
@@ -240,41 +291,65 @@ export default function LoginPage() {
                   type="button"
                   className="login-password-toggle"
                   onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+                  aria-label={
+                    showPassword ? "비밀번호 숨기기" : "비밀번호 보기"
+                  }
                 >
                   {showPassword ? (
                     /* 비밀번호 보일 때: 선 없는 열린 눈 */
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      aria-hidden
+                    >
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                       <circle cx="12" cy="12" r="3" />
                     </svg>
                   ) : (
                     /* 진입 시·비밀번호 숨길 때: 선 있는 눈(비공개) */
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      aria-hidden
+                    >
                       <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                       <line x1="1" y1="1" x2="23" y2="23" />
                     </svg>
                   )}
                 </button>
-                {passwordError && <p className="login-input-error-msg" role="alert">{passwordError}</p>}
+                {passwordError && (
+                  <p className="login-input-error-msg" role="alert">
+                    {passwordError}
+                  </p>
+                )}
               </div>
               <div className="login-form-options">
                 <label className="login-check-wrap">
                   <input
-                      type="checkbox"
-                      className="login-check"
-                      checked={isRememberMe}
-                      onChange={(e) => setIsRememberMe(e.target.checked)}
+                    type="checkbox"
+                    className="login-check"
+                    checked={isRememberMe}
+                    onChange={(e) => setIsRememberMe(e.target.checked)}
                   />
                   <span className="login-check-text">자동 로그인</span>
                 </label>
-                <Link href="/login/forgot-password" className="login-forgot">비밀번호찾기</Link>
+                <Link href="/login/forgot-password" className="login-forgot">
+                  비밀번호찾기
+                </Link>
               </div>
               <button
-                  type="button"
-                  className="login-btn login-btn--primary"
-                  disabled={isSubmitting || !email.trim() || !password.trim()}
-                  onClick={handleLogin}
+                type="button"
+                className="login-btn login-btn--primary"
+                disabled={isSubmitting || !email.trim() || !password.trim()}
+                onClick={handleLogin}
               >
                 {isSubmitting ? "로그인 중..." : "로그인"}
               </button>
@@ -286,10 +361,7 @@ export default function LoginPage() {
         </div>
       </main>
 
-      <TermsModal
-        isOpen={isTermsOpen}
-        onClose={() => setIsTermsOpen(false)}
-      />
+      <TermsModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
       <PrivacyModal
         isOpen={isPrivacyOpen}
         onClose={() => setIsPrivacyOpen(false)}

@@ -93,6 +93,18 @@ body.login-page {
   max-height: 90vh;
   object-fit: contain;
   object-position: left bottom;
+  animation: login-character-rise 2.0s ease-out both;
+}
+
+@keyframes login-character-rise {
+  from {
+    transform: translateY(80px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* 로그인 패널: 통째로 오른쪽 정렬 */
