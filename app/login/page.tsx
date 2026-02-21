@@ -152,6 +152,7 @@ export default function LoginPage() {
               <span className="logo-text">AIQ</span>
             </span>
           </Link>
+          <p className="login-tagline">지구인을 위한 새로운 쇼핑 판단 기준</p>
 
           {view === "social" ? (
             <>
@@ -272,7 +273,7 @@ export default function LoginPage() {
               <button
                   type="button"
                   className="login-btn login-btn--primary"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !email.trim() || !password.trim()}
                   onClick={handleLogin}
               >
                 {isSubmitting ? "로그인 중..." : "로그인"}

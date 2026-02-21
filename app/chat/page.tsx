@@ -1085,7 +1085,14 @@ export default function ChatPage() {
                 <button
                   type="button"
                   className="rpt-bottom-btn rpt-bottom-btn--secondary"
-                  onClick={() => setPostReportMode("conversation")}
+                  onClick={() => {
+                    setMessages(prev => [...prev, {
+                      id: generateId(),
+                      text: "요청이 필요한 버튼을 선택해줘!",
+                      isUser: false,
+                    }]);
+                    setPostReportMode("conversation");
+                  }}
                 >
                   대화하기
                 </button>

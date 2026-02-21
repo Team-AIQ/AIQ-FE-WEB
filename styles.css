@@ -1974,3 +1974,13 @@ body::-webkit-scrollbar-thumb:hover {
     max-height: 36vh;
   }
 }
+
+/* ========== 마우스 따라다니는 별빛 파티클 효과 ========== */
+.mouse-sparkle {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  width: 100vw;
+  height: 100vh;
+}
