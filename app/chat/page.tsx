@@ -9,7 +9,7 @@ import HelpModal from "@/components/HelpModal";
 // @ts-ignore
 import { EventSourcePolyfill } from "event-source-polyfill";
 interface AiRecommendation {
-  modelName: string;
+  productName: string;
   targetAudience: string;
   selectionReasons: string[];
 }
@@ -779,7 +779,7 @@ export default function ChatPage() {
                       <div className="rpt-ai-card-body-new">
                         {found.aiData.recommendations?.slice(0, 1).map((rec, i) => (
                           <div key={i} className="rpt-ai-card-item-new">
-                            <strong>1. {rec.modelName || rec.targetAudience}</strong>
+                            <strong>1. {rec.productName || rec.targetAudience}</strong>
                             <ul className="rpt-ai-card-reasons">
                               {rec.selectionReasons?.map((r, ri) => (
                                 <li key={ri}>{r}</li>
@@ -839,7 +839,7 @@ export default function ChatPage() {
                 {panelAi.aiData.recommendations?.map((rec, recIdx) => (
                   <div key={recIdx} className="rpt-panel-rec">
                     <h4 className="rpt-panel-rec-t">
-                      {recIdx + 1}. {rec.modelName || rec.targetAudience}
+                      {recIdx + 1}. {rec.productName || rec.targetAudience}
                     </h4>
                     <ul className="rpt-panel-rec-ul">
                       {rec.selectionReasons?.map((reason, rIdx) => (
@@ -1194,6 +1194,7 @@ export default function ChatPage() {
                 </div>
             )}
 
+            <div className="chat-bottom-area">
             {reportPhase === "report" && postReportMode === null ? (
               /* 히스토리 리포트: 하단 입력 영역 없음 */
               null
@@ -1294,7 +1295,7 @@ export default function ChatPage() {
                 />
                 <button
                     type="button"
-                    className="chat-send-btn"
+                    className={`chat-send-btn${inputValue.trim() ? " chat-send-btn--active" : ""}`}
                     aria-label="보내기"
                     onClick={handleContinueChat}
                 >
@@ -1315,7 +1316,7 @@ export default function ChatPage() {
                 />
                 <button
                     type="button"
-                    className="chat-send-btn"
+                    className={`chat-send-btn${inputValue.trim() && reportPhase === "idle" ? " chat-send-btn--active" : ""}`}
                     aria-label="보내기"
                     onClick={handleSend}
                     disabled={reportPhase !== "idle"}
@@ -1324,6 +1325,7 @@ export default function ChatPage() {
                 </button>
               </div>
             )}
+            </div>
           </main>
         </div>
       </>

@@ -269,7 +269,7 @@ body.onboarding-page {
   width: 100%;
   display: flex;
   justify-content: center; /* 채팅 기준 중앙 정렬 */
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.25rem;
 }
 
 .onboarding-gauge-img {

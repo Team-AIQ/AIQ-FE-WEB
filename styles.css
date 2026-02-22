@@ -312,7 +312,7 @@ body::-webkit-scrollbar-thumb:hover {
 
 .hero-mascot {
   position: relative;
-  margin: 0 auto 1.25rem;
+  margin: 1.5rem auto 1.25rem;
   width: 380px;
   height: 380px;
 }
@@ -686,7 +686,7 @@ body::-webkit-scrollbar-thumb:hover {
   align-content: end;
   width: 100%;
   padding-bottom: 0;
-  padding-top: 60px;
+  padding-top: 20px;
   transition:
     gap 0.35s ease,
     grid-template-columns 0.35s ease;
@@ -1183,8 +1183,8 @@ body::-webkit-scrollbar-thumb:hover {
   bottom: 2rem;
   right: 2rem;
   z-index: 999;
-  width: 3rem;
-  height: 3rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border: 1.5px solid var(--color-mint);
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.7);

@@ -510,6 +510,7 @@ body.chat-page {
 .chat-character-wrap {
   margin: auto 0;
   flex-shrink: 0;
+  padding-top: 2rem;
 }
 
 .chat-character {
@@ -589,6 +590,17 @@ body.chat-page {
   pointer-events: none;
   text-align: center;
   line-height: 1.4;
+}
+
+/* 하단 UI 고정 영역 - 입력창/버튼 상태에 관계없이 일정 높이 유지 */
+.chat-bottom-area {
+  flex-shrink: 0;
+  width: 100%;
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 /* 입력창 + 전송 버튼: 이미지와 동일 – 밝은 회색 필드, 오른쪽에 어두운 회색 종이비행기 아이콘, 전체 밝은 민트 글로우 */
@@ -712,6 +724,10 @@ body.chat-page {
   cursor: not-allowed;
   transform: none;
 }
+
+.chat-send-btn--active .chat-send-icon {
+  filter: invert(72%) sepia(60%) saturate(450%) hue-rotate(108deg) brightness(105%) contrast(90%);
+}
 .chat-input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -788,7 +804,7 @@ body.chat-page {
 
 /* AIQ 채팅끼리만 간격 축소, 사용자↔AIQ 간격은 유지 */
 .chat-message--ai + .chat-message--ai {
-  margin-top: -1.125rem;
+  margin-top: -0.75rem;
 }
 
 .chat-message-icon {
@@ -829,11 +845,11 @@ body.chat-page {
     0 0 40px rgba(63, 221, 144, 0.35);
 }
 
-/* AI 답변 아바타 - 초록색 원 제거, 사용자 아이콘 크기만큼 */
+/* AI 답변 아바타 */
 .chat-message-avatar {
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -847,9 +863,9 @@ body.chat-page {
   mix-blend-mode: lighten;
 }
 
-/* 2번째 AI 채팅부터 프로필 숨김, 말풍선 정렬용 빈 공간만 유지 */
+/* 2번째 AI 채팅부터 프로필 숨김 */
 .chat-message-avatar--hidden {
-  visibility: hidden;
+  display: none;
   pointer-events: none;
 }
 
@@ -907,6 +923,7 @@ body.chat-page {
   font-family: "Galmuri9", sans-serif;
   font-size: 0.8rem;
   color: var(--color-white);
+  align-self: center;
 }
 
 /* 큐레이션 옵션 버튼 (말풍선 바깥 아래) */

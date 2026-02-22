@@ -135,13 +135,25 @@
   font-size: 0.8rem;
 }
 
-.profile-input:focus {
+.profile-input:not(.profile-input--readonly):focus {
   border-color: var(--color-white);
 }
 
 .profile-input--readonly {
-  opacity: 0.5;
+  color: #808080;
+  border-color: rgba(255, 255, 255, 0.12);
   cursor: default;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 비밀번호 변경/확인 입력창 - 기본 및 포커스 시 초록 테두리 */
+.profile-input-pw-wrap .profile-input {
+  border-color: rgba(63, 221, 144, 0.5);
+}
+
+.profile-input-pw-wrap .profile-input:focus {
+  border-color: #3FDD90;
 }
 
 /* 비밀번호 래퍼 */
