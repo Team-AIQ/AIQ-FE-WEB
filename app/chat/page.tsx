@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { getUserNickname , getUserId, getAccessToken, isGuest, clearTokens} from "@/lib/auth";
+import { getUserId, getAccessToken, isGuest, clearTokens} from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 import { initRewardedAd, showRewardedAd } from "@/lib/ad";
 import HelpModal from "@/components/HelpModal";
@@ -149,6 +149,7 @@ export default function ChatPage() {
   const aiTogglesRef = useRef(aiToggles);
   const [isGuestUser, setIsGuestUser] = useState(true);
   const [userCredit, setUserCredit] = useState<number>(0);
+  const [creditFetched, setCreditFetched] = useState(false); // API 성공 여부 (미구현 시 체크 스킵)
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [historyList, setHistoryList] = useState<HistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -193,15 +194,11 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
-    const nickname = getUserNickname();
-    if (nickname) {
-      setUserNickname(nickname);
-    }
     setIsGuestUser(isGuest());
-    // 로그인 사용자면 히스토리 목록 불러오기 + 광고 초기화 + 크레딧 조회
+    // 로그인 사용자면 히스토리 목록 불러오기 + 광고 초기화 + 사용자 정보 조회
     if (!isGuest()) {
       fetchHistory();
-      fetchCredit();
+      fetchUserInfo();
       const userId = getUserId();
       if (userId) initRewardedAd(String(userId));
     }
@@ -222,15 +219,18 @@ export default function ChatPage() {
     }
   };
 
-  const fetchCredit = async () => {
+  const fetchUserInfo = async () => {
     try {
-      const res = await apiFetch("/api/v1/user/credit");
+      const res = await apiFetch("/api/users/me");
       if (res.ok) {
         const json = await res.json();
-        setUserCredit(json.data?.credit ?? json.data ?? 0);
+        const data = json.data;
+        setUserCredit(data?.currentCredits ?? 0);
+        if (data?.nickname) setUserNickname(data.nickname);
+        setCreditFetched(true);
       }
     } catch (e) {
-      console.error("크레딧 조회 실패:", e);
+      console.error("사용자 정보 조회 실패:", e);
     }
   };
 
@@ -345,7 +345,7 @@ export default function ChatPage() {
             ...prev,
             {
               id: generateId(),
-              text: data.message || "정밀한 결과를 제공하기 위해 몇 가지 질문을 할게!",
+              text: "정밀한 결과를 제공하기 위해 몇 가지 질문을 할게!\n답변 선택지를 클릭하거나 입력창에 답변을 입력해줘.",
               isUser: false,
             },
           ]);
@@ -402,8 +402,8 @@ export default function ChatPage() {
   };
 
   const submitAnswers = async (data: CurationResponse) => {
-    // 크레딧 부족 체크
-    if (!isGuestUser && userCredit < CREDIT_COST.BASIC_QUERY) {
+    // 크레딧 부족 체크 (API 응답 성공 시에만)
+    if (!isGuestUser && creditFetched && userCredit < CREDIT_COST.BASIC_QUERY) {
       setMessages(prev => [...prev, {
         id: generateId(),
         text: `크레딧이 부족합니다. 리포트 생성에 ${CREDIT_COST.BASIC_QUERY}C가 필요합니다. (현재 ${userCredit}C)\n광고를 시청하여 크레딧을 충전해주세요.`,
@@ -514,7 +514,7 @@ export default function ChatPage() {
           setReportPhase("report");
           setPostReportMode("select");
           // 리포트 생성 후 크레딧 갱신
-          fetchCredit();
+          fetchUserInfo();
         }
       } catch (e) {
         console.error("데이터 파싱 에러", e);
@@ -661,6 +661,8 @@ export default function ChatPage() {
           text: json.data?.answer || json.message || "답변을 받았습니다.",
           isUser: false,
         }]);
+        // 이어서 대화 후 크레딧 갱신
+        fetchUserInfo();
       } else {
         setMessages(prev => [...prev, {
           id: generateId(),
@@ -732,7 +734,7 @@ export default function ChatPage() {
                   </div>
                   {product.productImage && (
                     <div className="rpt-product-image">
-                      <img src={product.productImage} alt={product.productName} onError={(e) => (e.currentTarget.style.display = "none")} />
+                      <img src={product.productImage} alt={product.productName} referrerPolicy="no-referrer" onError={(e) => (e.currentTarget.style.display = "none")} />
                     </div>
                   )}
                   {product.specs && Object.keys(product.specs).length > 0 && (
@@ -750,7 +752,7 @@ export default function ChatPage() {
                       rel="noopener noreferrer"
                       className="rpt-product-link"
                     >
-                      최저가 보러가기 →
+                      구매하러가기 →
                     </a>
                   )}
                 </div>
@@ -929,7 +931,7 @@ export default function ChatPage() {
                 className="chat-sidebar-credit-ad"
                 onClick={() => {
                   const shown = showRewardedAd(() => {
-                    fetchCredit();
+                    fetchUserInfo();
                     alert("광고 시청 완료! 1 크레딧이 지급되었습니다.");
                   });
                   if (!shown) {
@@ -1142,7 +1144,9 @@ export default function ChatPage() {
                                         )}
                                       </>
                                   ) : (
-                                      msg.text
+                                      msg.text.includes("\n")
+                                        ? renderFormattedText(msg.text)
+                                        : msg.text
                                   )}
                                 </div>
                                 {msg.variant === "sectorQuestion" && msg.options && msg.options.length > 0 && (
@@ -1228,19 +1232,28 @@ export default function ChatPage() {
                     type="button"
                     className="rpt-bottom-btn rpt-bottom-btn--primary"
                     onClick={() => {
+                      if (!isGuestUser && creditFetched && userCredit < CREDIT_COST.EXPAND_COMPARE) {
+                        alert(`크레딧이 부족합니다.\n확장 비교에 ${CREDIT_COST.EXPAND_COMPARE}C가 필요합니다. (현재 ${userCredit}C)\n광고를 시청하여 크레딧을 충전해주세요.`);
+                        return;
+                      }
                       setProductDisplayCount(3);
+                      fetchUserInfo();
                     }}
                   >
-                    비교후보 3개로 확장
+                    비교후보 3개로 확장 ({CREDIT_COST.EXPAND_COMPARE}C)
                   </button>
                   <button
                     type="button"
                     className="rpt-bottom-btn rpt-bottom-btn--secondary"
                     onClick={() => {
+                      if (!isGuestUser && creditFetched && userCredit < CREDIT_COST.CONTINUE_CHAT) {
+                        alert(`크레딧이 부족합니다.\n이어서 대화하기에 ${CREDIT_COST.CONTINUE_CHAT}C가 필요합니다. (현재 ${userCredit}C)\n광고를 시청하여 크레딧을 충전해주세요.`);
+                        return;
+                      }
                       setPostReportMode("freeChat");
                     }}
                   >
-                    이어서 질문하기
+                    이어서 질문하기 ({CREDIT_COST.CONTINUE_CHAT}C)
                   </button>
                 </div>
                 <div className="chat-recommend-questions">

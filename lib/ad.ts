@@ -27,9 +27,14 @@ export function initRewardedAd(userId: string) {
 
     if (rewardedSlot) {
       rewardedSlot.addService(googletag.pubads());
-      rewardedSlot.setServerSideVerificationOptions({
-        userIdentifier: userId,
-      });
+
+      // SSV 옵션: 메서드가 존재하는 경우에만 호출 (GPT 버전에 따라 지원 여부 다름)
+      // 실제 광고 ID 적용 시 AdSense 대시보드에서 SSV URL 설정 필요
+      if (typeof rewardedSlot.setServerSideVerificationOptions === "function") {
+        rewardedSlot.setServerSideVerificationOptions({
+          userIdentifier: userId,
+        });
+      }
 
       googletag.pubads().addEventListener("rewardedSlotReady", () => {
         isReady = true;

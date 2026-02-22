@@ -87,12 +87,12 @@ export default function HelpModal({ isOpen, onClose }: HelpModalProps) {
                 리포트 생성 시 소진됩니다.
               </li>
               <li>
-                <strong>제품 추천 3개 확장 (5C):</strong> 최종 추천 제품
+                <strong>제품 추천 3개 확장 (10C):</strong> 최종 추천 제품
                 1개에서 범위를 넓혀 TOP 3 제품까지 확장하여 비교하고 싶을 때
                 사용합니다.
               </li>
               <li>
-                <strong>이어서 질문하기 (5C):</strong> 현재 결과에서 세부 내용을
+                <strong>이어서 질문하기 (10C):</strong> 현재 결과에서 세부 내용을
                 더 묻거나 추가 요구사항을 반영하고 싶을 때 사용합니다.
               </li>
             </ul>

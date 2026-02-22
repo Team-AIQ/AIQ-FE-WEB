@@ -116,16 +116,22 @@ export default function HomePage() {
     let inHero = true;
 
     interface Particle {
-      x: number; y: number; vx: number; vy: number;
-      size: number; alpha: number; decay: number; color: string;
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      size: number;
+      alpha: number;
+      decay: number;
+      color: string;
     }
     const particles: Particle[] = [];
 
     const colors = [
-      "rgba(63, 221, 144,",   // mint
-      "rgba(255, 255, 255,",  // white
-      "rgba(69, 211, 142,",   // teal
-      "rgba(150, 255, 200,",  // light mint
+      "rgba(63, 221, 144,", // mint
+      "rgba(255, 255, 255,", // white
+      "rgba(69, 211, 142,", // teal
+      "rgba(150, 255, 200,", // light mint
     ];
 
     const resize = () => {
@@ -186,7 +192,10 @@ export default function HomePage() {
         p.alpha -= p.decay;
         p.size *= 0.98;
 
-        if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
 
         ctx.save();
         ctx.globalAlpha = p.alpha;
@@ -285,7 +294,7 @@ export default function HomePage() {
           }
         }
       },
-      { threshold: 0 }
+      { threshold: 0 },
     );
 
     // about(2단)부터 footer까지 모두 감시 → 2단 이후 어디든 보이면 버튼 표시
@@ -512,7 +521,7 @@ export default function HomePage() {
             <p className="step-desc">
               분석 결과에 가장 부합하는 제품 링크를
               <br />
-              연결하여 쇼핑의 마지막 단계를 돕습니다
+              제공하여 쇼핑 여정을 단축합니다
             </p>
             <div className="step-illust step-4">
               <img

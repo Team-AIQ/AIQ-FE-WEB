@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getUserNickname, getUserEmail, clearTokens, isGuest } from "@/lib/auth";
+import { clearTokens, isGuest } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 
 export default function ProfilePage() {
@@ -22,10 +22,14 @@ export default function ProfilePage() {
       window.location.href = "/chat";
       return;
     }
-    const n = getUserNickname();
-    const e = getUserEmail();
-    if (n) setNickname(n);
-    if (e) setEmail(e);
+    apiFetch("/api/users/me").then(async (res) => {
+      if (res.ok) {
+        const json = await res.json();
+        const data = json.data;
+        if (data?.nickname) setNickname(data.nickname);
+        if (data?.email) setEmail(data.email);
+      }
+    }).catch(() => {});
   }, []);
 
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,16}$/;
@@ -76,7 +80,7 @@ export default function ProfilePage() {
 
   const handleDeleteAccount = async () => {
     try {
-      const res = await apiFetch("/api/user/account", { method: "DELETE" });
+      const res = await apiFetch("/api/auth/withdraw", { method: "DELETE" });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         alert(err.message || "회원탈퇴에 실패했습니다.");
