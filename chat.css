@@ -747,7 +747,7 @@ body.chat-page {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.75rem;
   margin-top: 4rem;
   margin-bottom: 2rem;
   padding: 2rem;
@@ -804,7 +804,7 @@ body.chat-page {
 
 /* AIQ 채팅끼리만 간격 축소, 사용자↔AIQ 간격은 유지 */
 .chat-message--ai + .chat-message--ai {
-  margin-top: -0.75rem;
+  margin-top: -0.5rem;
 }
 
 .chat-message-icon {
@@ -885,7 +885,7 @@ body.chat-page {
 /* 카테고리 섹터 질문 말풍선: 질문 텍스트 + 말풍선 안 우측에 1/4 */
 .chat-message-bubble--sector {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 1rem;
   width: 100%;
   max-width: 100%;
@@ -921,9 +921,15 @@ body.chat-page {
 .chat-sector-progress {
   flex-shrink: 0;
   font-family: "Galmuri9", sans-serif;
-  font-size: 0.8rem;
-  color: var(--color-white);
+  font-size: 0.75rem;
+  color: rgba(63, 221, 144, 0.9);
+  background: rgba(63, 221, 144, 0.1);
+  border: 1px solid rgba(63, 221, 144, 0.3);
+  border-radius: 20px;
+  padding: 0.15rem 0.5rem;
+  white-space: nowrap;
   align-self: center;
+  text-align: center;
 }
 
 /* 큐레이션 옵션 버튼 (말풍선 바깥 아래) */
@@ -1083,7 +1089,7 @@ body.chat-page {
 }
 
 .rpt-consensus-sub {
-  margin: 14px 0 8px;
+  margin: 10px 0 6px;
   font-size: 0.82rem;
   font-weight: 800;
   color: rgba(63, 221, 144, 0.95);
@@ -1121,7 +1127,8 @@ body.chat-page {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 260px;
+  min-height: 180px;
+  max-height: 220px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -1153,12 +1160,15 @@ body.chat-page {
 
 /* 카드 본문 */
 .rpt-ai-card-body-new {
-  padding: 0 16px 12px;
+  padding: 0 16px 8px;
   color: #ddd;
-  font-size: 0.78rem;
-  line-height: 1.6;
+  font-size: 0.75rem;
+  line-height: 1.5;
   flex: 1;
   overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
 }
 
 .rpt-ai-card-item-new strong {
@@ -1273,6 +1283,37 @@ body.chat-page {
   font-weight: 700;
   color: rgba(63, 221, 144, 0.95);
   margin-bottom: 0;
+}
+
+/* 가격 wrap */
+.rpt-product-price-wrap {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 4px;
+}
+
+/* 시중 판매 평균가 레이블 */
+.rpt-product-price-label {
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* 제품 로딩 */
+.rpt-product-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  min-height: 120px;
+}
+
+.rpt-product-loading-text {
+  font-size: 0.75rem;
+  color: rgba(63, 221, 144, 0.7);
+  margin: 0;
 }
 
 .rpt-product-image {
@@ -1443,7 +1484,154 @@ body.chat-page {
   width: 100%;
 }
 
-/* ========== 인라인 리포트: 2×2 그리드 ========== */
+/* ========== V2 리포트 레이아웃 (Figma 기반) ========== */
+
+.rpt-v2 {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── 1개 제품 뷰: 제품카드(left) + 합의/패널(right) ─── */
+.rpt-v2-top-single {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  min-height: 300px;
+}
+
+.rpt-v2-single-product {
+  flex: 0 0 260px;
+  display: flex;
+  flex-direction: column;
+}
+
+.rpt-v2-single-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── 3개 제품 뷰: 3 카드 row ─── */
+.rpt-v2-top-triple {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* ─── 공용: 제품 카드 ─── */
+.rpt-v2-product-card {
+  border: 1px solid rgba(63, 221, 144, 0.4);
+  border-radius: 12px;
+  background: rgba(0, 10, 6, 0.75);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  overflow: hidden;
+}
+
+.rpt-v2-product-card--triple {
+  flex: 1;
+  min-width: 0;
+}
+
+.rpt-v2-product-rank-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.rpt-v2-product-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.35;
+  flex: 1;
+  min-width: 0;
+}
+
+.rpt-v2-img-wrap {
+  width: 100%;
+  flex: 1;
+  min-height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rpt-v2-img-wrap img {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  display: block;
+  object-fit: contain;
+}
+
+.rpt-v2-price-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 2px;
+}
+
+.rpt-v2-price {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: rgba(63, 221, 144, 0.95);
+}
+
+/* ─── 공용: AI 공통 합의 박스 ─── */
+.rpt-v2-consensus-box {
+  height: 100%;
+  border: 1px solid rgba(63, 221, 144, 0.3);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 16px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.rpt-v2-consensus-box::-webkit-scrollbar { display: none; }
+
+/* ─── 3개 뷰 미들: 합의 (+ 옵션 패널 split) ─── */
+.rpt-v2-middle {
+  display: flex;
+  gap: 10px;
+}
+
+.rpt-v2-middle .rpt-v2-consensus-box {
+  flex: 1;
+  max-height: 260px;
+  height: auto;
+}
+
+.rpt-v2-middle--split .rpt-v2-consensus-box {
+  flex: 1;
+}
+
+.rpt-v2-middle--split .rpt-panel-inline {
+  flex: 1;
+  max-height: 260px;
+}
+
+/* ─── 로딩 wide (3개 뷰) ─── */
+.rpt-product-loading--wide {
+  flex: 1;
+  border: 1px solid rgba(63, 221, 144, 0.2);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* ========== (구) 인라인 리포트: 2×2 그리드 - 하위호환 ========== */
 /* 좌상: 합의 | 우상: 제품 | 좌하: AI카드 | 우하: AI상세 */
 .chat-report-inline {
   width: 100%;
@@ -1626,6 +1814,19 @@ body.chat-page {
   .chat-report-inline {
     grid-template-columns: 1fr;
     grid-template-rows: auto;
+  }
+  /* v2 반응형 */
+  .rpt-v2-top-single {
+    flex-direction: column;
+  }
+  .rpt-v2-single-product {
+    flex: none;
+  }
+  .rpt-v2-top-triple {
+    flex-direction: column;
+  }
+  .rpt-v2-middle--split {
+    flex-direction: column;
   }
   .rpt-ai-row {
     grid-template-columns: 1fr;

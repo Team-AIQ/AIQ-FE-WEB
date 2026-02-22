@@ -6,7 +6,7 @@ import ChatLayout from "@/components/ChatLayout";
 import ChatHeader from "@/components/ChatHeader";
 
 interface AiRecommendation {
-  modelName: string;
+  productName: string;
   targetAudience: string;
   selectionReasons: string[];
 }
@@ -150,7 +150,10 @@ export default function ReportPage() {
                             <div className="rpt-product-info">
                               <div className="rpt-product-name">{product.productName}</div>
                               {product.price && (
-                                <div className="rpt-product-price">{product.price}</div>
+                                <div className="rpt-product-price-wrap">
+                                  <span className="rpt-product-price-label">(시중 판매 평균가)</span>
+                                  <span className="rpt-product-price">{product.price}</span>
+                                </div>
                               )}
                               {product.specs && Object.keys(product.specs).length > 0 && (
                                 <div className="rpt-product-specs">
@@ -210,7 +213,7 @@ export default function ReportPage() {
                               .map((rec, i) => (
                                 <div key={i} className="rpt-ai-card-item-new">
                                   <strong>
-                                    {rec.modelName || rec.targetAudience}
+                                    {rec.productName || rec.targetAudience}
                                   </strong>
                                   {rec.selectionReasons
                                     ?.slice(0, 1)
@@ -263,7 +266,7 @@ export default function ReportPage() {
                     {selectedAi.aiData.recommendations?.map((rec, recIdx) => (
                       <div key={recIdx} className="rpt-panel-rec">
                         <h4 className="rpt-panel-rec-t">
-                          {recIdx + 1}. {rec.modelName || rec.targetAudience}
+                          {recIdx + 1}. {rec.productName || rec.targetAudience}
                         </h4>
                         <ul className="rpt-panel-rec-ul">
                           {rec.selectionReasons?.map((reason, rIdx) => (
