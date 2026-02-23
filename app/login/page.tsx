@@ -286,6 +286,11 @@ export default function LoginPage() {
                     setPassword(e.target.value);
                     if (passwordError) setPasswordError("");
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !isSubmitting && email.trim() && password.trim()) {
+                      handleLogin();
+                    }
+                  }}
                 />
                 <button
                   type="button"

@@ -559,6 +559,12 @@ export default function ChatPage() {
       }
       console.error("SSE 에러 발생:", err);
       eventSource.close();
+      setReportPhase("idle");
+      setMessages(prev => [...prev, {
+        id: generateId(),
+        text: "리포트 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        isUser: false,
+      }]);
     };
   };
 
@@ -1121,7 +1127,7 @@ export default function ChatPage() {
                     const isFirstInBlock =
                         index === 0 || messages[index - 1].isUser !== msg.isUser;
                     return (
-                        <div key={msg.id} className={`chat-message ${msg.isUser ? "chat-message--user" : "chat-message--ai"}`}>
+                        <div key={msg.id} className={`chat-message ${msg.isUser ? "chat-message--user" : "chat-message--ai"}${msg.variant === "sectorQuestion" ? " chat-message--sector" : ""}`}>
                           {msg.isUser ? (
                               <>
                                 {isFirstInBlock ? (

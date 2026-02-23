@@ -66,14 +66,19 @@ export function isGuest(): boolean {
 }
 const ONBOARDING_DONE_KEY = "onboarding_done";
 
+function getOnboardingKey(): string {
+  const userId = getUserId();
+  return userId ? `${ONBOARDING_DONE_KEY}_${userId}` : ONBOARDING_DONE_KEY;
+}
+
 export function isOnboardingDone(): boolean {
   if (typeof window === "undefined") return false;
-  return localStorage.getItem(ONBOARDING_DONE_KEY) === "true";
+  return localStorage.getItem(getOnboardingKey()) === "true";
 }
 
 export function setOnboardingDone(): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(ONBOARDING_DONE_KEY, "true");
+  localStorage.setItem(getOnboardingKey(), "true");
 }
 
 export function getUserEmail(): string | null {

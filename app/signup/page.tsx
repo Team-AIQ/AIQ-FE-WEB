@@ -211,7 +211,11 @@ export default function SignupPage() {
                   onChange={(e) => {
                     const val = e.target.value;
                     setPassword(val);
-                    if (passwordError) setPasswordError("");
+                    if (val && !validatePassword(val)) {
+                      setPasswordError("영문 소문자, 숫자, 특수문자 $#! 포함 8~16자로 입력해주세요");
+                    } else {
+                      setPasswordError("");
+                    }
                     if (confirmPassword && val !== confirmPassword) {
                       setConfirmPasswordError("비밀번호가 올바르지 않습니다");
                     } else if (confirmPasswordError) {
@@ -319,7 +323,7 @@ export default function SignupPage() {
             <button
               type="submit"
               className="login-btn login-btn--primary signup-submit-btn"
-              disabled={!nickname.trim() || !email.trim() || !password || !confirmPassword || !agreeTerms || !emailVerified || !!emailError || !!confirmPasswordError || submitting}
+              disabled={!nickname.trim() || !email.trim() || !password || !validatePassword(password) || !confirmPassword || !agreeTerms || !emailVerified || !!emailError || !!confirmPasswordError || submitting}
             >
               {submitting ? "가입 중…" : "회원가입"}
             </button>

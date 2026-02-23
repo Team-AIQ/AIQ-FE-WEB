@@ -882,13 +882,17 @@ body.chat-page {
     0 0 24px rgba(63, 221, 144, 0.2);
 }
 
-/* 카테고리 섹터 질문 말풍선: 질문 텍스트 + 말풍선 안 우측에 1/4 */
+/* 섹터 질문 메시지 컨테이너: 너비 70%로 고정 */
+.chat-message--sector {
+  max-width: 70%;
+}
+
+/* 카테고리 섹터 질문 말풍선: 질문 텍스트 + 말풍선 안 우측에 N/10 */
 .chat-message-bubble--sector {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   width: 100%;
-  max-width: 100%;
 }
 
 /* ===== report 좌우 2단 레이아웃 ===== */
@@ -916,6 +920,7 @@ body.chat-page {
   min-width: 0;
   white-space: normal;
   word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .chat-sector-progress {

@@ -411,8 +411,11 @@ export default function ForgotPasswordPage() {
                       onChange={(e) => {
                         const value = e.target.value;
                         setNewPassword(value);
-                        // 비밀번호 에러 클리어
-                        if (passwordError) setPasswordError("");
+                        if (value && !isValidPassword(value)) {
+                          setPasswordError("영문 소문자, 숫자 포함 8~16자로 입력해주세요.");
+                        } else {
+                          setPasswordError("");
+                        }
                         // 비밀번호 확인과 일치 여부 확인
                         if (confirmPassword) {
                           if (value !== confirmPassword) {
