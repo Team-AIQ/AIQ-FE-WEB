@@ -603,6 +603,14 @@ body.chat-page {
   justify-content: flex-start;
 }
 
+.chat-bottom-area--hidden {
+  min-height: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 /* 입력창 + 전송 버튼: 이미지와 동일 – 밝은 회색 필드, 오른쪽에 어두운 회색 종이비행기 아이콘, 전체 밝은 민트 글로우 */
 /* 리포트 완료 후 하단 버튼 영역 */
 .chat-bottom-btns {
@@ -610,7 +618,7 @@ body.chat-page {
   max-width: 700px;
   display: flex;
   gap: 14px;
-  margin-top: 0.5rem;
+  margin-top: 0.85rem;
   flex-shrink: 0;
 }
 
@@ -810,7 +818,7 @@ body.chat-page {
 
 /* AIQ 채팅끼리만 간격 축소, 사용자↔AIQ 간격은 유지 */
 .chat-message--ai + .chat-message--ai {
-  margin-top: -0.5rem;
+  margin-top: -0.2rem;
 }
 
 .chat-message-icon {
@@ -1446,6 +1454,108 @@ body.chat-page {
   background: rgba(63, 221, 144, 0.15);
 }
 
+/* ========== report v3: left top product card ========== */
+.rpt-main-product {
+  border: 1px solid rgba(63, 221, 144, 0.45);
+  border-radius: 14px;
+  background: rgba(0, 12, 9, 0.9);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.rpt-main-product--empty {
+  justify-content: center;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.7);
+  min-height: 240px;
+}
+
+.rpt-main-product-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.4;
+}
+
+.rpt-main-product-image-wrap {
+  width: 100%;
+  aspect-ratio: 1.25 / 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #d8d8d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rpt-main-product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.rpt-main-no-image {
+  color: rgba(0, 0, 0, 0.35);
+  font-size: 3.2rem;
+  font-weight: 700;
+}
+
+.rpt-main-product-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rpt-main-product-spec {
+  font-size: 0.72rem;
+  color: #e6e6e6;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.rpt-main-price-label {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 2px;
+}
+
+.rpt-main-price {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #3FDD90;
+  line-height: 1;
+}
+
+.rpt-main-analysis {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: #d7d7d7;
+}
+
+.rpt-main-buy-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid rgba(63, 221, 144, 0.55);
+  color: #3FDD90;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.rpt-main-buy-link:hover {
+  background: rgba(63, 221, 144, 0.12);
+}
+
 /* ========== 오른쪽 패널 ========== */
 .rpt-panel {
   border: 1px solid rgba(63, 221, 144, 0.4);
@@ -1527,6 +1637,12 @@ body.chat-page {
   color: #d0d0d0;
 }
 
+.rpt-panel-rec-code {
+  margin: 0 0 4px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
 .rpt-panel-sec {
   margin-top: 16px;
   padding-top: 14px;
@@ -1555,7 +1671,13 @@ body.chat-page {
 
 /* 히스토리 리포트: 하단 입력 없으므로 높이 확장 */
 .chat-messages--history {
-  max-height: calc(100vh - 80px);
+  max-height: calc(100vh - 32px);
+  padding-top: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.chat-messages--history .chat-message--report {
+  margin-top: 0 !important;
 }
 
 /* 리포트 메시지는 전체 너비 사용 */
@@ -1882,11 +2004,447 @@ body.chat-page {
   background: rgba(255, 255, 255, 0.25);
 }
 
+.rpt-top3-cta-wrap {
+  flex: 1;
+  position: relative;
+  padding-top: 0;
+  overflow: visible;
+}
+
+.rpt-top3-guide-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(63, 221, 144, 0.65);
+  background: rgba(0, 0, 0, 0.75);
+  color: #3FDD90;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 0 14px rgba(63, 221, 144, 0.32);
+  z-index: 3;
+}
+
+.rpt-top3-guide-btn:hover {
+  background: rgba(63, 221, 144, 0.16);
+}
+
+.rpt-top3-cta-badge {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 165px;
+  max-width: calc(100% - 20px);
+  padding: 5px 10px 6px;
+  border-radius: 999px;
+  border: 2px solid #3FDD90;
+  background: #070707;
+  color: #fff;
+  font-family: "Galmuri9", sans-serif;
+  font-size: clamp(0.48rem, 0.74vw, 0.62rem);
+  font-weight: 400;
+  line-height: 1.05;
+  text-align: center;
+  box-shadow:
+    0 0 18px rgba(63, 221, 144, 0.55),
+    0 0 36px rgba(63, 221, 144, 0.35);
+  z-index: 2;
+}
+
+.rpt-top3-cta-badge::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(100% - 1px);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 15px solid #070707;
+}
+
+.rpt-top3-cta-credit {
+  position: absolute;
+  top: -9px;
+  right: 10px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #FF6A58;
+  color: #fff;
+  font-family: "Galmuri9", sans-serif;
+  font-size: clamp(0.44rem, 0.64vw, 0.54rem);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.rpt-top3-cta-text {
+  display: block;
+  white-space: nowrap;
+}
+
+.rpt-bottom-btn--top3 {
+  width: 100%;
+  height: 46px;
+  border-radius: 999px;
+  border: 2px solid #9AA5AB;
+  background: #DCDDE1;
+  color: #040404;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  position: relative;
+  box-shadow:
+    0 0 18px rgba(63, 221, 144, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.rpt-bottom-btn--top3:hover {
+  background: #E4E5E8;
+}
+
+.rpt-top3-cta-label {
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.rpt-top3-cta-action {
+  position: absolute;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #8F6AF0;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.2),
+    0 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+.rpt-top3-modal {
+  max-width: 1040px;
+  width: min(95vw, 1040px);
+  max-height: 86vh;
+}
+
+.rpt-top3-modal-content {
+  text-align: center;
+  padding: 1.9rem 1.6rem 1.3rem !important;
+  overflow: hidden !important;
+}
+
+.rpt-top3-modal-sub {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.rpt-top3-modal-divider {
+  width: 100%;
+  height: 1px;
+  margin: 0.6rem 0 0.9rem;
+  background: rgba(63, 221, 144, 0.55);
+}
+
+.rpt-top3-modal-image-placeholder {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(63, 221, 144, 0.35);
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.55);
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.rpt-top3-modal-image {
+  width: 100%;
+  height: auto;
+  max-height: 46vh;
+  object-fit: contain;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+.rpt-top3-modal-image-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.rpt-top3-modal-body {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.32;
+  color: #fff;
+}
+
 /* ===== 세로 AI 카드 2컬럼 레이아웃 ===== */
 .rpt-v2-layout {
   display: flex;
   gap: 12px;
   align-items: stretch;
+}
+
+/* ===== report v3: 상단 통합리포트 + 하단 AI답변 영역 ===== */
+.rpt-v3 {
+  --rpt-left-col-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  height: 100%;
+}
+
+.rpt-v3-first-layout {
+  display: grid;
+  grid-template-columns: var(--rpt-left-col-width) minmax(0, 1fr);
+  gap: 12px;
+  min-height: 620px;
+}
+
+.rpt-v3-first-left {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rpt-v3-first-ai-list .rpt-ai-list-vert {
+  overflow: visible;
+  max-height: none;
+}
+
+.rpt-v3-first-right {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rpt-v3-first-panel {
+  flex: 1;
+  min-height: 560px;
+}
+
+.rpt-v3-first-panel .rpt-v2-consensus-box,
+.rpt-v3-first-panel .rpt-panel-inline {
+  height: 100%;
+  max-height: none;
+}
+
+.rpt-v3--history {
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.rpt-v3-top {
+  display: grid;
+  grid-template-columns: var(--rpt-left-col-width) minmax(0, 1fr);
+  gap: 12px;
+  min-height: 0;
+}
+
+.rpt-v3-top--single {
+  grid-template-columns: var(--rpt-left-col-width) minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 420px;
+}
+
+.rpt-v3-top--triple {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.rpt-v3-top--triple .rpt-v2-product-card--triple {
+  height: 100%;
+}
+
+.rpt-v3--history .rpt-v3-top--triple {
+  gap: 8px;
+}
+
+.rpt-v3--history .rpt-v2-product-card--triple {
+  padding: 9px;
+  gap: 4px;
+}
+
+.rpt-v3--history .rpt-v2-product-name {
+  font-size: 0.76rem;
+}
+
+.rpt-v3--history .rpt-v2-img-wrap {
+  min-height: 88px;
+}
+
+.rpt-v3--history .rpt-v2-img-wrap img {
+  max-height: 155px;
+}
+
+.rpt-v3--history .rpt-product-spec {
+  font-size: 0.64rem;
+  padding: 3px 6px;
+}
+
+.rpt-v3--history .rpt-product-price-label {
+  font-size: 0.64rem;
+}
+
+.rpt-v3--history .rpt-v2-price {
+  font-size: 0.72rem;
+}
+
+.rpt-v3--history .rpt-product-link {
+  height: 32px;
+  font-size: 0.74rem;
+}
+
+.rpt-v3--history .rpt-v3-history-consensus .rpt-v2-consensus-box {
+  padding: 12px 14px;
+}
+
+.rpt-v3--history .rpt-consensus-title {
+  font-size: 0.98rem;
+  margin-bottom: 8px;
+}
+
+.rpt-v3--history .rpt-consensus-sub {
+  font-size: 0.82rem;
+  margin: 10px 0 6px;
+}
+
+.rpt-v3--history .rpt-consensus-text {
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.rpt-v3-top-left {
+  min-width: 0;
+}
+
+.rpt-v3-top-right {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rpt-v3-report-intro {
+  padding: 4px 2px 0;
+}
+
+.rpt-v3-report-eyebrow {
+  font-size: 0.68rem;
+  color: rgba(63, 221, 144, 0.8);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.rpt-v3-report-title {
+  margin: 2px 0 0;
+  font-size: 1rem;
+  color: #fff;
+  font-weight: 800;
+}
+
+.rpt-v3-top-right .rpt-v2-consensus-box {
+  height: auto;
+  min-height: 340px;
+  max-height: 420px;
+}
+
+.rpt-v3-bottom {
+  display: grid;
+  grid-template-columns: var(--rpt-left-col-width) minmax(0, 1fr);
+  gap: 12px;
+  min-height: 0;
+  flex: 1;
+}
+
+.rpt-v3-ai-section-box {
+  border: 1px solid rgba(63, 221, 144, 0.4);
+  border-radius: 12px;
+  background: rgba(0, 12, 8, 0.35);
+  padding: 12px;
+  min-height: 220px;
+}
+
+.rpt-v3-bottom-left {
+  min-width: 0;
+  min-height: 0;
+}
+
+.rpt-v3-bottom-left .rpt-ai-list-vert {
+  max-height: 100%;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.rpt-v3-bottom-right {
+  min-width: 0;
+  min-height: 0;
+}
+
+.rpt-v3-bottom-right .rpt-panel-inline {
+  height: 100%;
+}
+
+.rpt-v3-panel-empty {
+  height: 100%;
+  min-height: 180px;
+  border: 1px dashed rgba(63, 221, 144, 0.18);
+  border-radius: 12px;
+  background: rgba(0, 8, 5, 0.22);
+}
+
+.rpt-v3-ai-placeholder {
+  height: 100%;
+  min-height: 180px;
+  border: 1px dashed rgba(63, 221, 144, 0.28);
+  border-radius: 12px;
+  background: rgba(0, 8, 5, 0.45);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
+.rpt-v3-history-consensus {
+  min-height: 0;
 }
 
 .rpt-v2-left-col {
@@ -1910,7 +2468,7 @@ body.chat-page {
 .rpt-ai-list-vert {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* 개별 세로 AI 카드 - 전체 카드 형식 (rpt-ai-card-new와 동일한 외형) */
@@ -1939,6 +2497,62 @@ body.chat-page {
   background: rgba(255, 255, 255, 0.04);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   letter-spacing: 0.03em;
+}
+
+.rpt-ai-card-vert--compact {
+  min-height: 74px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rpt-ai-card-vert-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.rpt-ai-card-vert--compact .rpt-ai-card-head {
+  padding: 0;
+}
+
+.rpt-ai-card-vert--compact .rpt-ai-logo {
+  width: 22px;
+  height: 22px;
+}
+
+.rpt-ai-card-vert-sub {
+  margin-top: 2px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rpt-ai-card-vert-btn {
+  height: 32px;
+  min-width: 74px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(63, 221, 144, 0.6);
+  background: rgba(63, 221, 144, 0.08);
+  color: #3FDD90;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.rpt-ai-card-vert-btn:hover:not(:disabled) {
+  background: rgba(63, 221, 144, 0.18);
+}
+
+.rpt-ai-card-vert-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* ========== 반응형 ========== */
@@ -1979,5 +2593,74 @@ body.chat-page {
     flex: none;
     width: 100%;
     max-width: 100%;
+  }
+  .rpt-v3-top,
+  .rpt-v3-bottom {
+    grid-template-columns: 1fr;
+  }
+  .rpt-v3-first-layout {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .rpt-v3-first-panel {
+    min-height: 260px;
+  }
+  .rpt-v3-top--triple {
+    grid-template-columns: 1fr;
+  }
+  .rpt-v3-top-right .rpt-v2-consensus-box {
+    max-height: none;
+  }
+  .rpt-v3-ai-placeholder {
+    min-height: 120px;
+    font-size: 0.76rem;
+  }
+  .rpt-top3-cta-wrap {
+    padding-top: 0;
+  }
+  .rpt-top3-guide-btn {
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .rpt-top3-cta-badge {
+    top: -20px;
+    min-width: 150px;
+    padding: 4px 9px 5px;
+  }
+  .rpt-top3-cta-badge::after {
+    border-left-width: 7px;
+    border-right-width: 7px;
+    border-top-width: 14px;
+  }
+  .rpt-top3-cta-credit {
+    top: -8px;
+    right: 8px;
+    padding: 2px 6px;
+  }
+  .rpt-bottom-btn--top3 {
+    height: 46px;
+    padding: 0 12px;
+  }
+  .rpt-top3-modal-sub {
+    font-size: 0.9rem;
+  }
+  .rpt-top3-modal-image {
+    max-height: 34vh;
+  }
+  .rpt-top3-modal-body {
+    font-size: 0.92rem;
+  }
+  .rpt-top3-cta-label {
+    font-size: 0.84rem;
+  }
+  .rpt-top3-cta-action {
+    right: 10px;
+    width: 26px;
+    height: 26px;
+    font-size: 0.82rem;
+    box-shadow:
+      0 3px 10px rgba(0, 0, 0, 0.2),
+      0 0 0 4px rgba(255, 255, 255, 0.8);
   }
 }

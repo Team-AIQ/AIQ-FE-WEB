@@ -443,7 +443,7 @@ export default function ForgotPasswordPage() {
                         showNewPassword ? "비밀번호 숨기기" : "비밀번호 보기"
                       }
                     >
-                      {showNewPassword ? (
+                      {!showNewPassword ? (
                         <svg
                           width="20"
                           height="20"
@@ -521,7 +521,7 @@ export default function ForgotPasswordPage() {
                           : "비밀번호 보기"
                       }
                     >
-                      {showConfirmPassword ? (
+                      {!showConfirmPassword ? (
                         <svg
                           width="20"
                           height="20"

@@ -319,6 +319,7 @@
 .profile-modal-btns {
   display: flex;
   gap: 0.75rem;
+  margin-top: 0.25rem;
 }
 
 .profile-modal-btn {
@@ -331,6 +332,22 @@
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s;
+}
+
+.profile-modal-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.profile-modal-input {
+  margin-bottom: 0.9rem;
+}
+
+.profile-modal-hint {
+  margin: 0 0 0.9rem;
+  font-size: 0.74rem;
+  color: var(--color-gray);
+  line-height: 1.45;
 }
 
 .profile-modal-btn--cancel {
