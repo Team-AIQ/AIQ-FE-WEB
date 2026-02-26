@@ -64,12 +64,18 @@ interface Message {
   id: number;
   text: string;
   isUser: boolean;
-  variant?: "default" | "sectorQuestion" | "report";
+  variant?: "default" | "sectorQuestion" | "report" | "reportConfirm";
   progressLabel?: string;
   options?: string[];
 
   reportData?: FinalReport;
   aiResponses?: Record<string, AiResponse>;
+}
+interface CreditUsageNotice {
+  reason: string;
+  before: number;
+  spent: number;
+  after: number;
 }
 
 // 텍스트에 줄바꿈·불릿을 JSX로 변환
@@ -162,6 +168,7 @@ const CREDIT_COST = {
   EXPAND_COMPARE: 10, // 3개 모델 확장 비교
   CONTINUE_CHAT: 10, // 이어서 대화하기
 } as const;
+const AI_TOGGLE_STORAGE_KEY = "aiq_chat_ai_toggles";
 
 export default function ChatPage() {
   const [inputValue, setInputValue] = useState("");
@@ -210,8 +217,16 @@ export default function ChatPage() {
   const [initialLoading, setInitialLoading] = useState(false);
   const [completedAis, setCompletedAis] = useState<string[]>([]);
   const [isTop3GuideOpen, setIsTop3GuideOpen] = useState(false);
+  const [pendingReportData, setPendingReportData] =
+    useState<CurationResponse | null>(null);
   const [optionSelectionLocked, setOptionSelectionLocked] = useState(false);
+  const [creditUsageNotice, setCreditUsageNotice] =
+    useState<CreditUsageNotice | null>(null);
   const optionSelectionLockRef = useRef(false);
+  const optionProcessingRef = useRef(false);
+  const userCreditRef = useRef(0);
+  const submitAbortRef = useRef<AbortController | null>(null);
+  const cancelFlowRef = useRef(false);
 
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -241,6 +256,10 @@ export default function ChatPage() {
   useEffect(() => {
     aiTogglesRef.current = aiToggles;
   }, [aiToggles]);
+
+  useEffect(() => {
+    userCreditRef.current = userCredit;
+  }, [userCredit]);
 
   useEffect(() => {
     if (!isTop3GuideOpen) return;
@@ -274,7 +293,15 @@ export default function ChatPage() {
     setInitialLoading(false);
     setCompletedAis([]);
     setOptionSelectionLocked(false);
+    setPendingReportData(null);
+    setCreditUsageNotice(null);
     optionSelectionLockRef.current = false;
+    optionProcessingRef.current = false;
+    cancelFlowRef.current = true;
+    if (submitAbortRef.current) {
+      submitAbortRef.current.abort();
+      submitAbortRef.current = null;
+    }
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
       eventSourceRef.current = null;
@@ -290,6 +317,22 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(AI_TOGGLE_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (
+          typeof parsed?.chatgpt === "boolean" &&
+          typeof parsed?.gemini === "boolean" &&
+          typeof parsed?.perplexity === "boolean"
+        ) {
+          setAiToggles(parsed);
+        }
+      }
+    } catch (e) {
+      console.error("AI 토글 설정 복원 실패:", e);
+    }
+
     setIsGuestUser(isGuest());
     // 로그인 사용자면 히스토리 목록 불러오기 + 광고 초기화 + 사용자 정보 조회
     if (!isGuest()) {
@@ -299,6 +342,17 @@ export default function ChatPage() {
       if (userId) initRewardedAd(String(userId));
     }
   }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        AI_TOGGLE_STORAGE_KEY,
+        JSON.stringify(aiToggles),
+      );
+    } catch (e) {
+      console.error("AI 토글 설정 저장 실패:", e);
+    }
+  }, [aiToggles]);
 
   const fetchHistory = async () => {
     try {
@@ -321,13 +375,16 @@ export default function ChatPage() {
       if (res.ok) {
         const json = await res.json();
         const data = json.data;
-        setUserCredit(data?.currentCredits ?? 0);
+        const currentCredits = Number(data?.currentCredits ?? 0);
+        setUserCredit(currentCredits);
         if (data?.nickname) setUserNickname(data.nickname);
         setCreditFetched(true);
+        return currentCredits;
       }
     } catch (e) {
       console.error("사용자 정보 조회 실패:", e);
     }
+    return null;
   };
 
   const useTop3Credit = async () => {
@@ -345,7 +402,22 @@ export default function ChatPage() {
         });
 
         if (res.ok) {
-          await fetchUserInfo();
+          const beforeCredit = userCreditRef.current;
+          const latestCredit = await fetchUserInfo();
+          const spent =
+            latestCredit !== null && latestCredit < beforeCredit
+              ? beforeCredit - latestCredit
+              : CREDIT_COST.EXPAND_COMPARE;
+          const afterCredit =
+            latestCredit !== null
+              ? latestCredit
+              : Math.max(0, beforeCredit - spent);
+          setCreditUsageNotice({
+            reason: "TOP3 확인",
+            before: beforeCredit,
+            spent,
+            after: afterCredit,
+          });
           return true;
         }
 
@@ -478,6 +550,19 @@ export default function ChatPage() {
     const trimmed = inputValue.trim();
     if (!trimmed) return;
     if (reportPhase !== "idle") return;
+    if (optionProcessingRef.current) return;
+    if (pendingReportData) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: generateId(),
+          text: "리포트 생성 동의/비동의 버튼을 먼저 선택해주세요.",
+          isUser: false,
+        },
+      ]);
+      setInputValue("");
+      return;
+    }
 
     const userMessage: Message = {
       id: generateId(),
@@ -594,7 +679,7 @@ export default function ChatPage() {
         updatedQuestions.length,
       );
     } else {
-      await submitAnswers(updatedData);
+      requestReportConsent(updatedData);
     }
   };
 
@@ -616,7 +701,26 @@ export default function ChatPage() {
     }, 600);
   };
 
+  const requestReportConsent = (data: CurationResponse) => {
+    setOptionSelectionLocked(false);
+    optionSelectionLockRef.current = false;
+    setPendingReportData(data);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: generateId(),
+        text: "리포트 생성시 -3크레딧 차감됩니다\n*비동의시 메인화면으로 재이동됩니다",
+        isUser: false,
+        variant: "reportConfirm",
+        options: ["동의", "비동의"],
+      },
+    ]);
+  };
+
   const submitAnswers = async (data: CurationResponse) => {
+    cancelFlowRef.current = false;
+
+
     // 크레딧 부족 체크 (API 응답 성공 시에만)
     if (!isGuestUser && creditFetched && userCredit < CREDIT_COST.BASIC_QUERY) {
       setMessages((prev) => [
@@ -633,9 +737,12 @@ export default function ChatPage() {
     setTimeout(() => {
       setCompletedAis([]);
       setReportPhase("generating");
+      setCreditUsageNotice(null);
     }, 200);
 
     try {
+      const submitController = new AbortController();
+      submitAbortRef.current = submitController;
       const payload = {
         queryId: data.queryId,
         answers: data.questions.map((q) => ({
@@ -647,14 +754,20 @@ export default function ChatPage() {
       const submitRes = await apiFetch("/api/v1/curation/submit", {
         method: "POST",
         body: JSON.stringify(payload),
+        signal: submitController.signal,
       });
+      submitAbortRef.current = null;
 
       if (!submitRes.ok) {
         throw new Error("답변 제출 실패");
       }
 
+      if (cancelFlowRef.current) return;
       startSseStream(data.queryId);
     } catch (error) {
+      if ((error as Error)?.name === "AbortError" || cancelFlowRef.current) {
+        return;
+      }
       console.error(error);
       setReportPhase("idle");
       setMessages((prev) => [
@@ -703,6 +816,7 @@ export default function ChatPage() {
     let isFinished = false;
 
     const processData = (rawData: string) => {
+      if (cancelFlowRef.current) return;
       try {
         const parsed = JSON.parse(rawData);
 
@@ -741,7 +855,26 @@ export default function ChatPage() {
           setPostReportMode("select");
           setSelectedAiKey(null);
           // 리포트 생성 후 크레딧 갱신
-          fetchUserInfo();
+          if (!isGuestUser) {
+            const beforeCredit = userCreditRef.current;
+            void (async () => {
+              const latestCredit = await fetchUserInfo();
+              const spent =
+                latestCredit !== null && latestCredit < beforeCredit
+                  ? beforeCredit - latestCredit
+                  : CREDIT_COST.BASIC_QUERY;
+              const afterCredit =
+                latestCredit !== null
+                  ? latestCredit
+                  : Math.max(0, beforeCredit - spent);
+              setCreditUsageNotice({
+                reason: "리포트 생성",
+                before: beforeCredit,
+                spent,
+                after: afterCredit,
+              });
+            })();
+          }
         }
       } catch (e) {
         console.error("데이터 파싱 에러", e);
@@ -764,6 +897,7 @@ export default function ChatPage() {
     );
 
     eventSource.addEventListener("finish", () => {
+      if (cancelFlowRef.current) return;
       console.log("백엔드로부터 종료 신호를 받았습니다.");
       isFinished = true;
       eventSource.close();
@@ -774,10 +908,12 @@ export default function ChatPage() {
     };
 
     eventSource.onmessage = (event: MessageEvent) => {
+      if (cancelFlowRef.current) return;
       console.log("일반 메시지 수신:", event.data);
     };
 
     eventSource.onerror = (err: any) => {
+      if (cancelFlowRef.current) return;
       if (isFinished || eventSource.readyState === 2) {
         return;
       }
@@ -936,7 +1072,6 @@ export default function ChatPage() {
     if (!report) return null;
 
     const hasAiResponses = Object.keys(aiResp).length > 0;
-
     // 현재 선택된 AI의 상세 데이터
     const panelAi =
       hasAiResponses && selectedAiKey
@@ -1022,7 +1157,9 @@ export default function ChatPage() {
           <>
             <h4 className="rpt-consensus-sub">모델별 판단 근거 분석</h4>
             <div className="rpt-consensus-text">
-              {renderFormattedText(report.decisionBranches)}
+              {renderFormattedText(
+                toReadableParagraphs(report.decisionBranches),
+              )}
             </div>
           </>
         )}
@@ -1030,7 +1167,7 @@ export default function ChatPage() {
           <>
             <h4 className="rpt-consensus-sub">AIQ 최종 코멘트</h4>
             <div className="rpt-consensus-text">
-              {renderFormattedText(report.finalWord)}
+              {renderFormattedText(toReadableParagraphs(report.finalWord))}
             </div>
           </>
         )}
@@ -1042,61 +1179,70 @@ export default function ChatPage() {
       product: TopProduct,
       idx: number,
       isTriple = false,
-    ) => (
-      <div
-        key={idx}
-        className={`rpt-v2-product-card${isTriple ? " rpt-v2-product-card--triple" : ""}`}
-      >
-        <div className="rpt-v2-product-rank-title">
-          <span className="rpt-product-rank">
-            추천 제품 TOP {product.rank || idx + 1}
-          </span>
+    ) => {
+      const purchaseLink = product.lowestPriceLink ? (
+        <a
+          href={product.lowestPriceLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`rpt-product-link${product.price ? " rpt-product-link--inline" : ""}`}
+        >
+          구매하기
+        </a>
+      ) : null;
+
+      return (
+        <div
+          key={idx}
+          className={`rpt-v2-product-card${isTriple ? " rpt-v2-product-card--triple" : ""}`}
+        >
+          <div className="rpt-v2-product-rank-title">
+            <span className="rpt-product-rank">
+              추천 제품 TOP {product.rank || idx + 1}
+            </span>
+          </div>
+          <div className="rpt-v2-product-name">{product.productName}</div>
+          {product.productImage && (
+            <div className="rpt-v2-img-wrap">
+              <img
+                src={product.productImage}
+                alt={product.productName}
+                referrerPolicy="no-referrer"
+                onError={(e) => (e.currentTarget.style.display = "none")}
+              />
+            </div>
+          )}
+          {product.specs && Object.keys(product.specs).length > 0 && (
+            <div className="rpt-product-specs">
+              {Object.entries(product.specs)
+                .slice(0, 6)
+                .map(([key, val]) => (
+                  <span key={key} className="rpt-product-spec">
+                    {key}: {val}
+                  </span>
+                ))}
+            </div>
+          )}
+          {product.price && (
+            <div className="rpt-v2-price-wrap">
+              <span className="rpt-product-price-label">
+                (시중 판매 평균가)
+              </span>
+              <div className="rpt-v2-price-row">
+                <span className="rpt-v2-price">{product.price}</span>
+                {purchaseLink}
+              </div>
+            </div>
+          )}
+          {!product.price && purchaseLink}
+          {!isTriple && product.comparativeAnalysis && (
+            <div className="rpt-product-analysis">
+              {renderFormattedText(product.comparativeAnalysis)}
+            </div>
+          )}
         </div>
-        <div className="rpt-v2-product-name">{product.productName}</div>
-        {product.productImage && (
-          <div className="rpt-v2-img-wrap">
-            <img
-              src={product.productImage}
-              alt={product.productName}
-              referrerPolicy="no-referrer"
-              onError={(e) => (e.currentTarget.style.display = "none")}
-            />
-          </div>
-        )}
-        {product.specs && Object.keys(product.specs).length > 0 && (
-          <div className="rpt-product-specs">
-            {Object.entries(product.specs)
-              .slice(0, 6)
-              .map(([key, val]) => (
-                <span key={key} className="rpt-product-spec">
-                  {key}: {val}
-                </span>
-              ))}
-          </div>
-        )}
-        {product.price && (
-          <div className="rpt-v2-price-wrap">
-            <span className="rpt-product-price-label">(시중 판매 평균가)</span>
-            <span className="rpt-v2-price">{product.price}</span>
-          </div>
-        )}
-        {!isTriple && product.comparativeAnalysis && (
-          <div className="rpt-product-analysis">
-            {renderFormattedText(product.comparativeAnalysis)}
-          </div>
-        )}
-        {product.lowestPriceLink && (
-          <a
-            href={product.lowestPriceLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rpt-product-link"
-          >
-            구매하러가기 →
-          </a>
-        )}
-      </div>
-    );
+      );
+    };
 
     // ===== 세로 AI 카드 리스트 =====
     const renderAiCardsVertical = () =>
@@ -1181,7 +1327,11 @@ export default function ChatPage() {
 
             <div className="rpt-v3-first-right">
               <div className="rpt-v3-report-intro">
-                <h3 className="rpt-v3-report-title">AIQ의 통합 분석 리포트</h3>
+                <div className="rpt-v3-report-headline">
+                  <h3 className="rpt-v3-report-title">
+                    AIQ의 통합 분석 리포트
+                  </h3>
+                </div>
               </div>
               <div className="rpt-v3-first-panel">
                 {panelAi ? renderAiPanel() : renderConsensus()}
@@ -1195,26 +1345,42 @@ export default function ChatPage() {
     return (
       <div className={`rpt-v3${isHistoryReport ? " rpt-v3--history" : ""}`}>
         {isExpandedTop3 ? (
-          <div className="rpt-v3-top rpt-v3-top--triple">
-            {productLoading ? (
-              <div className="rpt-product-loading rpt-product-loading--wide">
-                <div className="chat-report-loading-dots" aria-hidden>
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                  <span />
+          <>
+            {hasAiResponses && (
+              <div className="rpt-v3-expanded-report">
+                <div className="rpt-v3-report-intro">
+                  <div className="rpt-v3-report-headline">
+                    <h3 className="rpt-v3-report-title">
+                      AIQ의 통합 분석 리포트
+                    </h3>
+                  </div>
                 </div>
-                <p className="rpt-product-loading-text">
-                  TOP 3 제품을 불러오는 중...
-                </p>
+                <div className="rpt-v3-history-consensus">
+                  {renderConsensus()}
+                </div>
               </div>
-            ) : (
-              report.topProducts
-                ?.slice(0, 3)
-                .map((product, idx) => renderProductCard(product, idx, true))
             )}
-          </div>
+            <div className="rpt-v3-top rpt-v3-top--triple">
+              {productLoading ? (
+                <div className="rpt-product-loading rpt-product-loading--wide">
+                  <div className="chat-report-loading-dots" aria-hidden>
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                  <p className="rpt-product-loading-text">
+                    TOP 3 제품을 불러오는 중...
+                  </p>
+                </div>
+              ) : (
+                report.topProducts
+                  ?.slice(0, 3)
+                  .map((product, idx) => renderProductCard(product, idx, true))
+              )}
+            </div>
+          </>
         ) : (
           <div className="rpt-v3-top rpt-v3-top--single">
             <div className="rpt-v3-top-left">
@@ -1240,13 +1406,17 @@ export default function ChatPage() {
 
             <div className="rpt-v3-top-right">
               <div className="rpt-v3-report-intro">
-                <h3 className="rpt-v3-report-title">AIQ의 통합 분석 리포트</h3>
+                <div className="rpt-v3-report-headline">
+                  <h3 className="rpt-v3-report-title">
+                    AIQ의 통합 분석 리포트
+                  </h3>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {hasAiResponses ? (
+        {hasAiResponses && !isExpandedTop3 ? (
           <div className="rpt-v3-ai-section-box">
             <div className="rpt-v3-bottom">
               <div className="rpt-v3-bottom-left">
@@ -1257,11 +1427,9 @@ export default function ChatPage() {
               </div>
             </div>
           </div>
-        ) : (
-          isExpandedTop3 && (
-            <div className="rpt-v3-history-consensus">{renderConsensus()}</div>
-          )
-        )}
+        ) : !hasAiResponses && isExpandedTop3 ? (
+          <div className="rpt-v3-history-consensus">{renderConsensus()}</div>
+        ) : null}
       </div>
     );
   };
@@ -1365,14 +1533,14 @@ export default function ChatPage() {
               onClick={() => {
                 const shown = showRewardedAd(() => {
                   fetchUserInfo();
-                  alert("광고 시청 완료! 1 크레딧이 지급되었습니다.");
+                  alert("광고 시청 완료! 2 크레딧이 지급되었습니다.");
                 });
                 if (!shown) {
                   alert("광고를 준비 중입니다. 잠시 후 다시 시도해주세요.");
                 }
               }}
             >
-              광고보기
+              광고보기 (2C)
               <svg
                 width="14"
                 height="14"
@@ -1656,7 +1824,8 @@ export default function ChatPage() {
                             msg.text
                           )}
                         </div>
-                        {msg.variant === "sectorQuestion" &&
+                        {(msg.variant === "sectorQuestion" ||
+                          msg.variant === "reportConfirm") &&
                           msg.options &&
                           msg.options.length > 0 && (
                             <div className="chat-option-buttons">
@@ -1670,25 +1839,79 @@ export default function ChatPage() {
                                     optionSelectionLocked
                                   }
                                   onClick={async () => {
+                                    if (msg.variant === "reportConfirm") {
+                                      if (!pendingReportData) return;
+
+                                      setMessages((prev) =>
+                                        prev.map((item) =>
+                                          item.id === msg.id
+                                            ? { ...item, options: [] }
+                                            : item,
+                                        ),
+                                      );
+
+                                      if (option === "비동의") {
+                                        cancelFlowRef.current = true;
+                                        if (submitAbortRef.current) {
+                                          submitAbortRef.current.abort();
+                                          submitAbortRef.current = null;
+                                        }
+                                        if (eventSourceRef.current) {
+                                          eventSourceRef.current.close();
+                                          eventSourceRef.current = null;
+                                        }
+                                        setMessages((prev) => [
+                                          ...prev,
+                                          {
+                                            id: generateId(),
+                                            text: "리포트 생성을 취소하고 메인 화면으로 이동합니다.",
+                                            isUser: false,
+                                          },
+                                        ]);
+                                        setPendingReportData(null);
+                                        resetToInitial();
+                                        return;
+                                      }
+
+                                      const data = pendingReportData;
+                                      await submitAnswers(data);
+                                      setPendingReportData(null);
+                                      return;
+                                    }
+
                                     if (
                                       reportPhase !== "idle" ||
                                       optionSelectionLocked ||
-                                      optionSelectionLockRef.current
+                                      optionSelectionLockRef.current ||
+                                      optionProcessingRef.current
                                     ) {
                                       return;
                                     }
                                     optionSelectionLockRef.current = true;
+                                    optionProcessingRef.current = true;
                                     setOptionSelectionLocked(true);
-                                    setInputValue(option);
-                                    const userMsg: Message = {
-                                      id: generateId(),
-                                      text: option,
-                                      isUser: true,
-                                    };
-                                    setMessages((prev) => [...prev, userMsg]);
-                                    setShowWelcome(false);
-                                    await proceedCuration(option);
-                                    setInputValue("");
+                                    // 같은 질문에서 중복 클릭을 즉시 차단
+                                    setMessages((prev) =>
+                                      prev.map((item) =>
+                                        item.id === msg.id
+                                          ? { ...item, options: [] }
+                                          : item,
+                                      ),
+                                    );
+                                    try {
+                                      setInputValue(option);
+                                      const userMsg: Message = {
+                                        id: generateId(),
+                                        text: option,
+                                        isUser: true,
+                                      };
+                                      setMessages((prev) => [...prev, userMsg]);
+                                      setShowWelcome(false);
+                                      await proceedCuration(option);
+                                      setInputValue("");
+                                    } finally {
+                                      optionProcessingRef.current = false;
+                                    }
                                   }}
                                 >
                                   {option}
@@ -1808,6 +2031,7 @@ export default function ChatPage() {
                           block: "start",
                         });
                         setProductLoading(true);
+                        setSelectedAiKey(null);
                         setTimeout(() => {
                           setProductDisplayCount(3);
                           setProductLoading(false);

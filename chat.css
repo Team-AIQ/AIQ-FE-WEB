@@ -935,6 +935,10 @@ body.chat-page {
   white-space: normal;
   word-break: keep-all;
   overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .chat-sector-progress {
@@ -956,6 +960,8 @@ body.chat-page {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
+  align-self: stretch;
+  width: 100%;
   gap: 8px;
   margin-top: 6px;
   margin-left: 0;
@@ -1439,7 +1445,9 @@ body.chat-page {
 }
 
 .rpt-product-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.7rem;
   font-weight: 700;
   color: rgba(63, 221, 144, 0.95);
@@ -1684,6 +1692,7 @@ body.chat-page {
 .chat-message--report {
   max-width: 100% !important;
   width: 100%;
+  scroll-margin-top: 96px;
 }
 
 /* ========== V2 리포트 레이아웃 (Figma 기반) ========== */
@@ -1778,11 +1787,22 @@ body.chat-page {
   gap: 1px;
   margin-top: 2px;
 }
+.rpt-v2-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 
 .rpt-v2-price {
   font-size: 0.88rem;
   font-weight: 800;
   color: rgba(63, 221, 144, 0.95);
+}
+.rpt-product-link--inline {
+  flex-shrink: 0;
+  min-width: 66px;
+  padding: 3px 9px;
 }
 
 /* ─── 공용: AI 공통 합의 박스 ─── */
@@ -2080,7 +2100,7 @@ body.chat-page {
   right: 10px;
   padding: 2px 7px;
   border-radius: 999px;
-  background: #FF6A58;
+  background: #ea2b1f;
   color: #fff;
   font-family: "Galmuri9", sans-serif;
   font-size: clamp(0.44rem, 0.64vw, 0.54rem);
@@ -2223,14 +2243,15 @@ body.chat-page {
   flex-direction: column;
   gap: 12px;
   min-height: 0;
-  height: 100%;
+  height: auto;
 }
 
 .rpt-v3-first-layout {
   display: grid;
   grid-template-columns: var(--rpt-left-col-width) minmax(0, 1fr);
   gap: 12px;
-  min-height: 620px;
+  min-height: 0;
+  align-items: stretch;
 }
 
 .rpt-v3-first-left {
@@ -2240,26 +2261,43 @@ body.chat-page {
   gap: 10px;
 }
 
+.rpt-v3-first-ai-list {
+  margin-top: 2px;
+}
+
 .rpt-v3-first-ai-list .rpt-ai-list-vert {
+  width: 100%;
   overflow: visible;
   max-height: none;
 }
 
 .rpt-v3-first-right {
   min-width: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-height: 100%;
 }
 
 .rpt-v3-first-panel {
+  display: flex;
   flex: 1;
-  min-height: 560px;
+  min-height: clamp(420px, 58vh, 760px);
+  min-width: 0;
+  width: 100%;
+}
+
+.rpt-v3-first-panel > * {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: none;
 }
 
 .rpt-v3-first-panel .rpt-v2-consensus-box,
 .rpt-v3-first-panel .rpt-panel-inline {
   height: 100%;
+  width: 100%;
   max-height: none;
 }
 
@@ -2354,13 +2392,14 @@ body.chat-page {
 
 .rpt-v3-top-right {
   min-width: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .rpt-v3-report-intro {
-  padding: 4px 2px 0;
+  padding: 0 2px 0;
 }
 
 .rpt-v3-report-eyebrow {
@@ -2372,10 +2411,43 @@ body.chat-page {
 }
 
 .rpt-v3-report-title {
-  margin: 2px 0 0;
+  margin: 0;
   font-size: 1rem;
   color: #fff;
   font-weight: 800;
+}
+.rpt-v3-report-headline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+.rpt-credit-usage-notice {
+  margin: 0;
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #ffe3df;
+  border: 1px solid rgba(234, 43, 31, 0.55);
+  background: rgba(234, 43, 31, 0.24);
+  line-height: 1.45;
+  white-space: nowrap;
+  text-align: left;
+  min-width: 124px;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 3px 12px rgba(234, 43, 31, 0.18);
+}
+.rpt-v3-expanded-report {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .rpt-v3-top-right .rpt-v2-consensus-box {
@@ -2414,10 +2486,18 @@ body.chat-page {
 .rpt-v3-bottom-right {
   min-width: 0;
   min-height: 0;
+  width: 100%;
 }
 
 .rpt-v3-bottom-right .rpt-panel-inline {
   height: 100%;
+  width: 100%;
+}
+
+.rpt-panel-inline,
+.rpt-v2-consensus-box {
+  box-sizing: border-box;
+  max-width: none;
 }
 
 .rpt-v3-panel-empty {
@@ -2441,6 +2521,67 @@ body.chat-page {
   text-align: center;
   font-size: 0.82rem;
   line-height: 1.7;
+}
+
+.chat-credit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.chat-credit-modal {
+  width: min(92vw, 360px);
+  border: 1px solid rgba(63, 221, 144, 0.35);
+  border-radius: 14px;
+  background: rgba(15, 15, 15, 0.95);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  padding: 22px 18px 16px;
+  color: #fff;
+  text-align: center;
+}
+
+.chat-credit-modal-text {
+  margin: 0 0 10px;
+  font-size: 1.02rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.chat-credit-modal-hint {
+  margin: 0 0 14px;
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+}
+
+.chat-credit-modal-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.chat-credit-modal-btn {
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chat-credit-modal-btn--cancel {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.chat-credit-modal-btn--confirm {
+  background: #3fdd90;
+  color: #09150f;
 }
 
 .rpt-v3-history-consensus {
@@ -2603,7 +2744,7 @@ body.chat-page {
     min-height: 0;
   }
   .rpt-v3-first-panel {
-    min-height: 260px;
+    min-height: 320px;
   }
   .rpt-v3-top--triple {
     grid-template-columns: 1fr;
@@ -2644,6 +2785,10 @@ body.chat-page {
   }
   .rpt-top3-modal-sub {
     font-size: 0.9rem;
+  }
+  .rpt-credit-usage-notice {
+    max-width: 100%;
+    text-align: center;
   }
   .rpt-top3-modal-image {
     max-height: 34vh;
